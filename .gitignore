@@ -1,2 +1,5 @@
 data/datasets
 data/data.tar.gz
+.venv/
+__pycache__
+outputs/

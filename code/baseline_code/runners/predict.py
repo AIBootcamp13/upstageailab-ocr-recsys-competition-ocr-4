@@ -1,9 +1,12 @@
 import os
 import sys
-import lightning.pytorch as pl
-import hydra
+from pathlib import Path
 
-sys.path.append(os.getcwd())
+import hydra
+import lightning.pytorch as pl
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
 from ocr.lightning_modules import get_pl_modules_by_cfg  # noqa: E402
 
 CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or '../configs'

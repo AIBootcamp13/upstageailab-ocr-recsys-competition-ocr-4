@@ -1,6 +1,6 @@
 # @package _global_
 
-dataset_base_path: "/data/datasets/"   # Change your path
+dataset_base_path: "./data/datasets/"   # Change your path
 
 datasets:
   train_dataset:
