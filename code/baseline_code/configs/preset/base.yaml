@@ -1,0 +1,15 @@
+dataset_path: ocr.datasets
+model_path: ocr.models
+encoder_path: ocr.models.encoder
+decoder_path: ocr.models.decoder
+head_path: ocr.models.head
+loss_path: ocr.models.loss
+lightning_path: ocr.lightning_modules
+
+hydra:
+  run:
+    dir: 'outputs/${exp_name}'
+
+log_dir: 'outputs/${exp_name}/logs'
+checkpoint_dir: 'outputs/${exp_name}/checkpoints'
+submission_dir: 'outputs/${exp_name}/submissions'

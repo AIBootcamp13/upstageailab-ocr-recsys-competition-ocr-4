@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - base
+  - /preset/datasets/db
+  - /preset/models/model_example
+  - /preset/lightning_modules/base
+  - _self_

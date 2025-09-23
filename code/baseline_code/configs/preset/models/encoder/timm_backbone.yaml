@@ -1,0 +1,8 @@
+# @package _global_
+
+models:
+  encoder:
+    _target_: ${encoder_path}.TimmBackbone
+    model_name: 'resnet18'
+    select_features: [1, 2, 3, 4]            # Output layer
+    pretrained: true
