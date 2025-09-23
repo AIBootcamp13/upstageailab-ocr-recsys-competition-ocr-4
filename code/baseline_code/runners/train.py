@@ -1,6 +1,12 @@
 import os
 import sys
+import warnings
 from pathlib import Path
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"^pkg_resources is deprecated as an API",
+)
 
 import lightning.pytorch as pl
 import hydra
