@@ -1,5 +1,7 @@
 import os
 import sys
+from pathlib import Path
+
 import lightning.pytorch as pl
 import hydra
 from lightning.pytorch.callbacks import (  # noqa
@@ -7,7 +9,9 @@ from lightning.pytorch.callbacks import (  # noqa
     ModelCheckpoint,
 )
 
-sys.path.append(os.getcwd())
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from ocr.lightning_modules import get_pl_modules_by_cfg  # noqa: E402
 
 CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or '../configs'
