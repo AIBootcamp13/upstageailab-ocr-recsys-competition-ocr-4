@@ -1,0 +1,2 @@
+- 한국어로 답변해라.
+- pip 대신에 uv add를 사용해라. python 대신에 uv run python을 사용해라.
