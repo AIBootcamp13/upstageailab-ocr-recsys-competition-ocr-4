@@ -4,7 +4,7 @@
 | ![류지헌](https://avatars.githubusercontent.com/u/10584296?v=4) | ![김태현](https://avatars.githubusercontent.com/u/7031901?v=4) | ![박진섭](https://avatars.githubusercontent.com/u/208775216?v=4) | ![문진숙](https://avatars.githubusercontent.com/u/204665219?v=4) | ![김재덕](https://avatars.githubusercontent.com/u/33456585?v=4) |
 | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------------: |
 |            [류지헌](https://github.com/mahomi)             |            [김태현](https://github.com/huefilm)             |            [박진섭](https://github.com/seob1504)             |            [문진숙](https://github.com/June3723)             |            [김재덕](https://github.com/ttcoaster)             |
-|                   팀장, RAG 아키텍처 설계<br/>RAG 파이프라인 구현                   |                   문서 전처리 및 분할<br/>검색 최적화                   |                   임베딩 및 벡터 저장소<br/>성능 튜닝                   |                   프롬프트 엔지니어링<br/>답변 품질 개선                   |                   API 통합 및 배포<br/>환경 설정 관리                   |
+|                   팀장, OCR 모델 아키텍처 설계<br/>DBNet 파이프라인 구현                   |                   데이터 전처리 및 증강<br/>이미지 변환 최적화                   |                   모델 학습 및 하이퍼파라미터 튜닝<br/>성능 최적화                   |                   후처리 및 평가 메트릭 개선<br/>CLEval 최적화                   |                   모델 배포 및 제출 파일 생성<br/>환경 설정 관리                   |
 
 ## 0. Overview
 ### Environment
