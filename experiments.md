@@ -78,3 +78,13 @@
 - Test CLEval (val split): recall 0.3159 / precision 0.9095 / hmean 0.4518
 - 체크포인트: `outputs/convnext_tiny/checkpoints/epoch=8-step=1845.ckpt`
 - 메모: ConvNeXt 백본은 수렴 불안정, 추가 튜닝 필요 → 채택 보류
+
+### 2025-09-24 — baseline_polygon (ResNet18 + use_polygon)
+- 목적: 베이스라인 설정으로 되돌리고 polygon 후처리를 활성화한 모델 재학습
+- 실행 명령: `uv run python code/baseline_code/runners/train.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=baseline_polygon`
+- 주요 설정: encoder ResNet18, decoder in_channels [64,128,256,512], train 증강 기본값, postprocess.use_polygon=True
+- Validation CLEval: recall 0.9270 / precision 0.9741 / hmean 0.9480
+- Test CLEval (val split): recall 0.9270 / precision 0.9741 / hmean 0.9480
+- 체크포인트: `outputs/baseline_polygon/checkpoints/epoch=9-step=2050.ckpt`
+- 제출파일: `outputs/baseline_polygon_pred/submissions/20250924_155253.csv`
+- 메모: polygon 사용으로 recall/precision 모두 상승, 리더보드 제출 권장
