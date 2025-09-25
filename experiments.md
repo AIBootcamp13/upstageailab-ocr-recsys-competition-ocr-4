@@ -111,3 +111,38 @@
 - Validation CLEval: recall 0.9778 / precision 0.9765 / hmean 0.9767
 - 제출파일: `outputs/hrnet_full_thresh_pred/submissions/20250924_191204.csv`
 - 메모: 기본 설정 대비 hmean +0.0149, 현재 최종 제출 후보
+
+### 2025-09-24 — hrnet_postprocess_grid (tune_postprocess.py)
+- 목적: HRNet 체크포인트에 대해 `thresh`, `box_thresh` 격자 탐색으로 CLEval 개선 여부 확인
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/tune_postprocess.py --checkpoint outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt --exp-name=hrnet_tune_grid1 --overrides preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] --thresh 0.23 0.25 0.27 --box-thresh 0.40 0.43 0.46 0.49`
+- 주요 설정: 새 스크립트 `code/baseline_code/runners/tune_postprocess.py` 사용, 기본 unclip 비율 유지, 총 12조합 평가
+- Best CLEval (val split): recall 0.9807 / precision 0.9752 / hmean 0.9776 (`thresh=0.23`, `box_thresh=0.43`)
+- 메모: 기존 최고 대비 hmean +0.0009, recall 상승 폭이 precision 손실을 상회
+
+### 2025-09-24 — hrnet_full (thresh=0.23, box=0.43)
+- 목적: 격자 탐색에서 얻은 최적 후처리 설정으로 추론 성능 재평가
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/test.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=hrnet_eval_thresh_v2 "checkpoint_path='outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt'" models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] models.head.postprocess.thresh=0.23 models.head.postprocess.box_thresh=0.43`
+- Validation CLEval: recall 0.9807 / precision 0.9752 / hmean 0.9776
+- 제출파일: (생성 안 함)
+- 메모: 현재까지 최고 CLEval, 제출용 CSV 생성 시 `predictions/` 폴더 지정 필요
+
+### 2025-09-25 — hrnet_postprocess_grid2 (세밀 탐색)
+- 목적: `thresh` 0.22~0.24, `box_thresh` 0.41~0.44 범위 재탐색으로 추가 향상 도모
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/tune_postprocess.py --checkpoint outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt --exp-name=hrnet_tune_grid2 --overrides preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] --thresh 0.22 0.23 0.24 --box-thresh 0.41 0.42 0.43 0.44`
+- 주요 설정: box/polygon unclip 비율 기본값 유지, 12 조합 반복 평가
+- Best CLEval (val split): recall 0.9816 / precision 0.9749 / hmean 0.9779 (`thresh=0.22`, `box_thresh=0.42`)
+- 메모: hmean 소폭 상승, 낮은 thresh가 recall 극대화에 기여
+
+### 2025-09-25 — hrnet_postprocess_unclip (unclip 비율 포함 탐색)
+- 목적: 최상 조합(thresh=0.22, box=0.42) 기준으로 `box_unclip_ratio`, `polygon_unclip_ratio` 튜닝
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/tune_postprocess.py --checkpoint outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt --exp-name=hrnet_tune_unclip2 --overrides preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] --thresh 0.22 --box-thresh 0.42 --box-unclip-ratio 1.3 1.4 1.5 1.6 --polygon-unclip-ratio 1.8 2.0`
+- 주요 설정: 8 조합 평가, min_size 기본값 유지
+- Best CLEval (val split): recall 0.9808 / precision 0.9775 / hmean 0.9788 (`thresh=0.22`, `box_thresh=0.42`, `box_unclip_ratio=1.3`, `polygon_unclip_ratio=1.8`)
+- 메모: Precision 향상이 두드러져 hmean 추가 +0.0012 확보, 현재 최고 기록
+
+### 2025-09-25 — hrnet_full (thresh=0.22, box=0.42, unclip=1.3/1.8)
+- 목적: 최종 설정으로 검증/제출 산출물 생성
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/test.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=hrnet_eval_thresh_v3 "checkpoint_path='outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt'" models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] models.head.postprocess.thresh=0.22 models.head.postprocess.box_thresh=0.42 models.head.postprocess.box_unclip_ratio=1.3 models.head.postprocess.polygon_unclip_ratio=1.8`
+- Validation CLEval: recall 0.9808 / precision 0.9775 / hmean 0.9788
+- 제출파일: `outputs/hrnet_pred_thresh_v3/submissions/20250925_024745.csv`
+- 메모: 제출용 CSV는 predict 실행 후 `convert_submission.py`로 변환, 현시점 최고 성능
