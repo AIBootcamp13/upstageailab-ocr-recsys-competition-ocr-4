@@ -43,6 +43,7 @@ def train(config):
     print(f"[{start_time:%Y-%m-%d %H:%M:%S}] Training run started. Log file: {log_path}", flush=True)
 
     best_checkpoint = None
+    best_epoch = None
 
     try:
         pl.seed_everything(config.get("seed", 42), workers=True)
@@ -93,6 +94,7 @@ def train(config):
         best_checkpoint = checkpoint_callback.best_model_path
         if best_checkpoint:
             checkpoint = torch.load(best_checkpoint, map_location='cpu')
+            best_epoch = checkpoint.get("epoch")
             state_dict = checkpoint.get("state_dict", checkpoint)
             model_module.load_state_dict(state_dict)
 
@@ -102,6 +104,8 @@ def train(config):
         )
 
         if best_checkpoint:
+            if best_epoch is not None:
+                print(f"Best checkpoint epoch: {best_epoch}")
             trainer.predict(
                 model_module,
                 data_module,
@@ -110,7 +114,10 @@ def train(config):
             if getattr(model_module, "last_submission_paths", None):
                 paths = model_module.last_submission_paths
                 print(f"Submission JSON saved to: {paths['json']}")
-                print(f"Submission CSV saved to: {paths['csv']}")
+                if best_epoch is not None:
+                    print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
+                else:
+                    print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
         else:
             print("Model checkpoint was not created; skipping submission generation.")
     finally:
