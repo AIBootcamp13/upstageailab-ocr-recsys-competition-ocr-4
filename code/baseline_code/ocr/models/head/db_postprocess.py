@@ -91,7 +91,6 @@ class DBPostProcessor:
         return coords.T[:, :2]
 
     def binarize(self, pred):
-        # Binarize the prediction
         return pred > torch.Tensor([self.thresh]).to(device=pred.device)
 
     def polygons_from_bitmap(self, pred, _bitmap,
@@ -289,4 +288,10 @@ class DBPostProcessor:
 
         cv2.fillPoly(mask, box.reshape(1, -1, 2).astype(np.int32), 1)
 
-        return cv2.mean(bitmap[ymin:ymax + 1, xmin:xmax + 1], mask)[0]
+        region = bitmap[ymin:ymax + 1, xmin:xmax + 1]
+        if isinstance(region, torch.Tensor):
+            region = region.detach().cpu().numpy()
+        if region.ndim == 3:
+            region = region[0]  # (1, H, W) -> (H, W)
+        region = region.astype(np.float32)
+        return cv2.mean(region, mask)[0]

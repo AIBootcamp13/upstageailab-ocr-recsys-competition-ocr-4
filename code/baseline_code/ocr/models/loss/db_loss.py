@@ -12,6 +12,7 @@
 '''
 
 from collections import OrderedDict
+import torch
 import torch.nn as nn
 from .bce_loss import BCELoss
 from .l1_loss import MaskL1Loss
@@ -43,7 +44,7 @@ class DBPP_Loss(nn.Module):
         loss_prob = self.bce_loss(pred_prob, gt_prob_maps, gt_prob_mask)
         loss_dict = OrderedDict(loss_prob=loss_prob)
         if pred_thresh is not None:
-            loss_thresh = self.l1_loss(pred_thresh, gt_thresh_maps, gt_thresh_mask)
+            loss_thresh = self.dice_loss(pred_thresh, gt_thresh_maps, gt_thresh_mask)
             loss_binary = self.dice_loss(pred_binary, gt_prob_maps, gt_prob_mask)
 
             loss = self.alpha * loss_prob + self.beta * loss_binary + self.gamma * loss_thresh

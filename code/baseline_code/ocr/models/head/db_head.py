@@ -56,6 +56,7 @@ class DBHead(nn.Module):
                                                           self.inner_channels, 2, 2))
                 binarize_layers.append(nn.BatchNorm2d(self.inner_channels))
                 binarize_layers.append(nn.ReLU(inplace=True))
+        
         binarize_layers.append(nn.Sigmoid())
         self.binarize = nn.Sequential(*binarize_layers)
         self.binarize.apply(self.weights_init)
@@ -87,6 +88,7 @@ class DBHead(nn.Module):
                                                          smooth=smooth, bias=bias))
                 thresh_layers.append(nn.BatchNorm2d(self.inner_channels))
                 thresh_layers.append(nn.ReLU(inplace=True))
+        
         thresh_layers.append(nn.Sigmoid())
         thresh = nn.Sequential(*thresh_layers)
 

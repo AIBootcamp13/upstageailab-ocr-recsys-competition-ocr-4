@@ -3,7 +3,7 @@
 models:
   decoder:
     _target_: ${decoder_path}.UNet
-    in_channels: [64, 128, 256, 512]  # Input layer channel
+    in_channels: [96, 192, 384, 768]  # Input layer channel
     strides: [4, 8, 16, 32]           # Input layer scale
     inner_channels: 256               # Hidden layer channel
     output_channels: 64               # output layer channel

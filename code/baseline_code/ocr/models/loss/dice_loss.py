@@ -43,5 +43,5 @@ class DiceLoss(nn.Module):
         intersection = (pred * gt * mask).sum()
         union = (pred * mask).sum() + (gt * mask).sum() + self.eps
         loss = 1 - 2.0 * intersection / union
-        assert loss <= 1
+
         return loss

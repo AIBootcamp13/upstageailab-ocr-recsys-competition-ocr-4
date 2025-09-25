@@ -3,6 +3,6 @@
 models:
   encoder:
     _target_: ${encoder_path}.TimmBackbone
-    model_name: 'resnet18'
-    select_features: [1, 2, 3, 4]            # Output layer
+    model_name: 'convnext_tiny'
+    select_features: [0, 1, 2, 3]            # Output layer
     pretrained: true

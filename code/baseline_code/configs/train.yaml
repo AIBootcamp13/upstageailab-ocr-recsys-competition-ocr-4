@@ -5,10 +5,10 @@ defaults:
   - override hydra/job_logging: disabled
 
 seed: 42
-exp_name: "ocr_training"
+exp_name: "convnext_tiny"
 project_name: "OCRProject"
 
-wandb: False
+wandb: True
 exp_version: "v1.0"
 
 resume: null

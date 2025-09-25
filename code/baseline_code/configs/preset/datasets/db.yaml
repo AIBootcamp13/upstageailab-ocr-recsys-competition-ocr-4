@@ -99,15 +99,15 @@ transforms:
 
 dataloaders:
   train_dataloader:
-    batch_size: 16
+    batch_size: 8
     shuffle: True
     num_workers: 4
   val_dataloader:
-    batch_size: 16
+    batch_size: 8
     shuffle: False
     num_workers: 4
   test_dataloader:
-    batch_size: 16
+    batch_size: 8
     shuffle: False
     num_workers: 4
   predict_dataloader:
