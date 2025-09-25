@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 from .db_postprocess import DBPostProcessor
 from collections import OrderedDict
+from .adaptive_scale_fusion import AdaptiveScaleFusion
 
 
 class DBHead(nn.Module):
@@ -28,6 +29,13 @@ class DBHead(nn.Module):
         self.in_channels = in_channels
         self.inner_channels = in_channels // 4
         self.k = k
+
+        # DBNet++: AdaptiveScaleFusion 추가
+        self.adaptive_scale_fusion = AdaptiveScaleFusion(
+            in_channels=self.in_channels,
+            inter_channels=self.inner_channels,
+            out_features_num=4
+        )
 
         # Feature embedding을 Upscale에 따라 확장
         self.upscale = int(math.log2(upscale))
@@ -105,8 +113,9 @@ class DBHead(nn.Module):
         return torch.reciprocal(1 + torch.exp(-self.k * (x - y)))
 
     def forward(self, features, return_loss=True):
-        # Input feature concat
-        fuse = torch.cat(features, dim=1)
+        # DBNet++: AdaptiveScaleFusion으로 feature fusion
+        concat_x = torch.cat(features, dim=1)
+        fuse = self.adaptive_scale_fusion(concat_x, features)
 
         # Probability map
         binary = self.binarize(fuse)

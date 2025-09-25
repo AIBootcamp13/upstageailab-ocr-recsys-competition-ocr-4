@@ -1,4 +1,4 @@
-from .db_loss import DBLoss
+from .db_loss import DBPP_Loss
 from .l1_loss import MaskL1Loss
 from .bce_loss import BCELoss
 from .dice_loss import DiceLoss
