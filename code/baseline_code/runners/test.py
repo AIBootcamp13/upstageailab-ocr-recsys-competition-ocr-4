@@ -1,13 +1,16 @@
 import os
 import sys
 from pathlib import Path
+from datetime import datetime
 
-import hydra
 import lightning.pytorch as pl
+import hydra
+from hydra.core.hydra_config import HydraConfig
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 from ocr.lightning_modules import get_pl_modules_by_cfg  # noqa: E402
+from ocr.utils.console_logging import setup_console_logging  # noqa: E402
 
 CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or '../configs'
 
@@ -20,34 +23,46 @@ def test(config):
     Args:
         `config` (dict): A dictionary containing configuration settings for test.
     """
-    pl.seed_everything(config.get("seed", 42), workers=True)
+    run_dir = Path(HydraConfig.get().runtime.output_dir)
+    log_dir = Path(getattr(config, "log_dir", run_dir / "logs"))
+    log_path = setup_console_logging(log_dir, "test.log")
 
-    model_module, data_module = get_pl_modules_by_cfg(config)
+    start_time = datetime.now()
+    print(f"[{start_time:%Y-%m-%d %H:%M:%S}] Test run started. Log file: {log_path}", flush=True)
 
-    if config.get("wandb"):
-        from lightning.pytorch.loggers import WandbLogger as Logger  # noqa: E402
-        logger = Logger(config.exp_name, project=config.project_name, config=dict(config))
-    else:
-        from lightning.pytorch.loggers.tensorboard import TensorBoardLogger  # noqa: E402
-        logger = TensorBoardLogger(
-            save_dir=config.log_dir,
-            name=config.exp_name,
-            version=config.exp_version,
-            default_hp_metric=False,
+    try:
+        pl.seed_everything(config.get("seed", 42), workers=True)
+
+        model_module, data_module = get_pl_modules_by_cfg(config)
+
+        if config.get("wandb"):
+            from lightning.pytorch.loggers import WandbLogger as Logger  # noqa: E402
+            logger = Logger(config.exp_name, project=config.project_name, config=dict(config))
+        else:
+            from lightning.pytorch.loggers.tensorboard import TensorBoardLogger  # noqa: E402
+            logger = TensorBoardLogger(
+                save_dir=str(log_dir),
+                name=config.exp_name,
+                version=config.exp_version,
+                default_hp_metric=False,
+            )
+
+        trainer = pl.Trainer(
+            logger=logger,
         )
 
-    trainer = pl.Trainer(
-        logger=logger,
-    )
+        ckpt_path = config.get("checkpoint_path")
+        assert ckpt_path is not None, "checkpoint_path must be provided for test"
 
-    ckpt_path = config.get("checkpoint_path")
-    assert ckpt_path is not None, "checkpoint_path must be provided for test"
-
-    trainer.test(
-        model_module,
-        data_module,
-        ckpt_path=ckpt_path,
-    )
+        trainer.test(
+            model_module,
+            data_module,
+            ckpt_path=ckpt_path,
+        )
+    finally:
+        end_time = datetime.now()
+        elapsed = end_time - start_time
+        print(f"[{end_time:%Y-%m-%d %H:%M:%S}] Test run finished. Duration: {elapsed}", flush=True)
 
 
 if __name__ == "__main__":

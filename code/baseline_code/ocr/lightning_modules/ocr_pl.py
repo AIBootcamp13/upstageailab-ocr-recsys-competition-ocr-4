@@ -9,6 +9,7 @@ from collections import OrderedDict
 from torch.utils.data import DataLoader
 from hydra.utils import instantiate
 from ocr.metrics import CLEvalMetric
+from ocr.utils.convert_submission import convert_json_to_csv
 
 
 class OCRPLModule(pl.LightningModule):
@@ -22,6 +23,7 @@ class OCRPLModule(pl.LightningModule):
         self.validation_step_outputs = OrderedDict()
         self.test_step_outputs = OrderedDict()
         self.predict_step_outputs = OrderedDict()
+        self.last_submission_paths: dict[str, str] = {}
 
     def forward(self, x):
         return self.model(return_loss=False, **x)
@@ -89,6 +91,12 @@ class OCRPLModule(pl.LightningModule):
         cleval_metrics = defaultdict(list)
 
         for gt_filename, gt_words in tqdm(self.dataset['test'].anns.items(), desc="Evaluation"):
+            if gt_filename not in self.test_step_outputs:
+                cleval_metrics['recall'].append(np.array(0., dtype=np.float32))
+                cleval_metrics['precision'].append(np.array(0., dtype=np.float32))
+                cleval_metrics['hmean'].append(np.array(0., dtype=np.float32))
+                continue
+
             pred = self.test_step_outputs[gt_filename]
             det_quads = [[point for coord in polygons for point in coord]
                          for polygons in pred]
@@ -136,10 +144,18 @@ class OCRPLModule(pl.LightningModule):
 
         # Export submission
         with submission_file.open("w") as fp:
-            if self.config.minified_json:
+            if getattr(self.config, "minified_json", False):
                 json.dump(submission, fp, indent=None, separators=(',', ':'))
             else:
                 json.dump(submission, fp, indent=4)
+
+        csv_file = submission_file.with_suffix(".csv")
+        convert_json_to_csv(str(submission_file), str(csv_file))
+
+        self.last_submission_paths = {
+            "json": str(submission_file.resolve()),
+            "csv": str(csv_file.resolve()),
+        }
 
         self.predict_step_outputs.clear()
 
