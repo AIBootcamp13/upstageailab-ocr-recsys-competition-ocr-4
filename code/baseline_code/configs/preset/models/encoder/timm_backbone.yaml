@@ -3,6 +3,6 @@
 models:
   encoder:
     _target_: ${encoder_path}.TimmBackbone
-    model_name: 'convnext_tiny'
+    model_name: 'convnext_base'
     select_features: [0, 1, 2, 3]            # Output layer
     pretrained: true
