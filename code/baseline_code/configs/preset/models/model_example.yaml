@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /preset/models/decoder/unet
+  - /preset/models/decoder/dbpp_fpnc
   - /preset/models/encoder/timm_backbone
   - /preset/models/head/db_head
   - /preset/models/loss/db_loss

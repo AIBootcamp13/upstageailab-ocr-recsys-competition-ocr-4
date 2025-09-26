@@ -1,4 +1,5 @@
 from .unet import UNet
+from .fpnc import FPNC
 from hydra.utils import instantiate
 
 

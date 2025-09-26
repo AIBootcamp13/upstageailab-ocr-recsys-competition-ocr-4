@@ -105,8 +105,11 @@ class DBHead(nn.Module):
         return torch.reciprocal(1 + torch.exp(-self.k * (x - y)))
 
     def forward(self, features, return_loss=True):
-        # Input feature concat
-        fuse = torch.cat(features, dim=1)
+        # DBNet++ 디코더(FPNC)는 이미 concat된 텐서를 반환하므로 유형에 따라 처리
+        if isinstance(features, torch.Tensor):
+            fuse = features
+        else:
+            fuse = torch.cat(features, dim=1)
 
         # Probability map
         binary = self.binarize(fuse)

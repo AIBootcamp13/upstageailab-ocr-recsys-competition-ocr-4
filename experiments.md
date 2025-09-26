@@ -146,3 +146,32 @@
 - Validation CLEval: recall 0.9808 / precision 0.9775 / hmean 0.9788
 - 제출파일: `outputs/hrnet_pred_thresh_v3/submissions/20250925_024745.csv`
 - 메모: 제출용 CSV는 predict 실행 후 `convert_submission.py`로 변환, 현시점 최고 성능
+
+### 2025-09-26 — hrnet_dbpp_full (HRNet-W18 + DBNet++)
+- 목적: FPNC(+ASF) 디코더가 포함된 DBNet++ 구조로 백본 HRNet-W18 학습
+- 실행 명령: `uv run python code/baseline_code/runners/train.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=hrnet_dbpp_full models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024]`
+- Validation CLEval: recall 0.9515 / precision 0.9787 / hmean 0.9648
+- Test CLEval (val split): recall 0.9602 / precision 0.9788 / hmean 0.9684
+- 체크포인트: `outputs/2025-09-25/22-35-11/checkpoints/epoch=6-step=1435.ckpt`
+- 메모: DBNet++ 전환으로 초기 hmean은 기존 HRNet 대비 -0.0104p, 추후 파인튜닝 및 후처리 탐색 진행
+
+### 2025-09-26 — hrnet_dbpp_postprocess_grid (확장 탐색)
+- 목적: DBNet++ 체크포인트 기준 `thresh`, `box_thresh`, unclip 비율 동시 탐색으로 최적 CLEval 도출
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/tune_postprocess.py --checkpoint outputs/2025-09-25/22-35-11/checkpoints/epoch=6-step=1435.ckpt --exp-name=hrnet_dbpp_tune_grid --overrides preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] --thresh 0.19 0.20 0.21 0.22 0.23 --box-thresh 0.40 0.42 0.44 --box-unclip-ratio 1.2 1.3 1.4 1.5 1.6 --polygon-unclip-ratio 1.6 1.8 2.0`
+- Best CLEval (val split): recall 0.9737 / precision 0.9773 / hmean 0.9750 (`thresh=0.20`, `box_thresh=0.40`, `box_unclip_ratio=1.2`, `polygon_unclip_ratio=1.8`)
+- 메모: 낮은 threshold·unclip 조합이 recall/precision 균형 확보, 이후 파인튜닝에도 동일 설정 사용
+
+### 2025-09-26 — hrnet_dbpp_full_ft (resume + 장기 학습)
+- 목적: DBNet++ 모델을 checkpoint(epoch=6)에서 이어 학습해 수렴 안정화
+- 실행 명령: `uv run python code/baseline_code/runners/train.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=hrnet_dbpp_full_ft trainer.max_epochs=15 "resume='outputs/2025-09-25/22-35-11/checkpoints/epoch=6-step=1435.ckpt'" models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024]`
+- Validation CLEval: recall 0.9568 / precision 0.9793 / hmean 0.9678
+- Test CLEval (val split): recall 0.9757 / precision 0.9779 / hmean 0.9763
+- 체크포인트: `outputs/2025-09-26/07-26-00/checkpoints/epoch=12-step=2665.ckpt`
+- 메모: 재학습 후 테스트 hmean +0.0079p 개선, 최적 후처리 적용 시 추가 상승 확인
+
+### 2025-09-26 — hrnet_dbpp_full (thresh=0.20, box=0.40, unclip=1.2/1.8)
+- 목적: 파인튜닝된 DBNet++ 모델에 최적 후처리 파라미터 적용해 최종 성능 산출
+- 실행 명령: `TQDM_DISABLE=1 uv run python code/baseline_code/runners/test.py preset=example dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/ exp_name=hrnet_dbpp_ft_eval_best "checkpoint_path='outputs/2025-09-26/07-26-00/checkpoints/epoch=12-step=2665.ckpt'" models.encoder.model_name=hrnet_w18 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] models.head.postprocess.thresh=0.20 models.head.postprocess.box_thresh=0.40 models.head.postprocess.box_unclip_ratio=1.2 models.head.postprocess.polygon_unclip_ratio=1.8`
+- Test CLEval (val split): recall 0.9772 / precision 0.9774 / hmean 0.9769
+- 제출파일: `outputs/2025-09-26/10-47-31/submissions/20250926_104804.csv`
+- 메모: HRNet + DBNet 원본 대비 hmean -0.0019p, precision 유지·recall 약간 감소, 추가 최적화(optimizer/스케줄) 여지 존재
