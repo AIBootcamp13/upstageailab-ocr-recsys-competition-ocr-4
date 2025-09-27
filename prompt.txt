@@ -1,0 +1,30 @@
+그렇게 진행하되 베스트 점수를 갱신할때마다 제출파일 csv도 생성해줘.
+
+에폭을 10으로만 실험하고 있는거 같은데 좀 더 늘리고 얼리스탑을 적용하는게 어떤가?
+uv run python code/baseline_code/runners/train.py preset=example dataset_base_path='/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/' exp_name=hrnet_dbpp_full models.encoder.model_name=hrnet_w18 models.encoder.select_features='[1,2,3,4]' models.decoder.in_channels='[128,256,512,1024]'
+
+
+아래 사항을 적용해줘.
+- 실행할때마다 output폴더 매번 exp_name를 지정해야하는게 불편하다. hydra디폴트 저장방식인 outputs/yyyy-mm-dd/hh-mm-ss 방식이 더 나은거 같은데 이렇게 바꿔줘.
+- train.py, test.py, predict.py에서 콘솔에 출력되는 내용이 .log 텍스트 파일로 저장되도록 해줘.
+- train.py을 실행하면 베스트 에폭의 모델로 제출 csv 만드는것까지 진행할 수 있게 해줘.
+
+
+현재 이 프로젝트는 DBNet을 사용하고 있는데 DBNet++를 사용하도록 변경한후, experiments.md 의 hrnet_postprocess_unclip 설정대로 훈련을 시켜서 평가 점수가 얼마나 개선되는지 확인해줘.
+만약 평가점수가 너무 크게 떨어진다면 뭔가 잘못된것일테니 원인 분석해서 문제를 해결해줘.
+
+
+train.py을 실행하면 베스트 에폭의 모델로 제출 csv 을 만드는데 몇 번째 에폭으로 csv를 만드는지 (몇번째 에폭이 베스트였는지) 로그에 출력되도록 해줘.
+방금 outputs/2025-09-26/10-47-31/submissions/20250926_104804.csv 에서 사용한 방식으로 DBNet++ 말고 DBNet으로 모델 학습해줘.
+
+experiments.md 에서 최근 베스트 실험을 DBNet++와 DBNet 각각의 방식으로 비교하고 싶다. 각각 방식으로 모델을 학습을 해서 학습시간 및 평가 점수를 비교해줘.
+
+@experiments.md 의 베스트 평가 점수를 넘을때까지 개선을 시도해라.
+개선 아이디어
+- 베스트 파라미터를 사용하기
+- HRNet의 더 상위 모델 사용해보기
+- 입력 이미지의 해상도를 HRNet 모델에 더 적합한 해상도로 리사이즈하여 사용하기 (LongestMaxSize)
+- 입력 이미지의 해상도를 더 높은 해상도로 리사이즈하여 사용하기 (LongestMaxSize)
+
+train.py를 사용해서 모델 훈련을 해서 개선 아이디어를 참고하여 평가 점수를 개선해라. train.py를 실행하면 모델 훈련후 평가 점수 계산도 하도록 되어 있다. 서버 사양이 아슬아슬하므로 한번에 하나의 실험씩만 실행해라.
+프로그램 실행시 포그라운드로 실행하고 타임아웃은 4시간으로 실행해야한다.
