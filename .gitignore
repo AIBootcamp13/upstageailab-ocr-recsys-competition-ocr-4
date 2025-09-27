@@ -3,3 +3,5 @@ data/data.tar.gz
 .venv/
 __pycache__
 outputs/
+wandb/
+.env

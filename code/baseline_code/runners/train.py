@@ -3,6 +3,9 @@ import sys
 import warnings
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 warnings.filterwarnings(
     "ignore",
