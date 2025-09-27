@@ -92,21 +92,19 @@ parameters:
     min: 0.00005
     max: 0.0005
 
-  # 스케줄러 선택
-  models.scheduler._target_:
-    values:
-      - torch.optim.lr_scheduler.StepLR
-      - torch.optim.lr_scheduler.CosineAnnealingLR
+  # 스케줄러 선택 - 각 스케줄러별로 별도 설정
+  scheduler_type:
+    values: ['StepLR', 'CosineAnnealingLR']
 
-  # StepLR 파라미터
-  models.scheduler.step_size:
+  # StepLR 파라미터 (scheduler_type이 'StepLR'일 때만 사용)
+  step_lr_step_size:
     values: [50, 75, 100, 125]
 
-  models.scheduler.gamma:
+  step_lr_gamma:
     values: [0.1, 0.2, 0.5]
 
-  # CosineAnnealingLR 파라미터
-  models.scheduler.T_max:
+  # CosineAnnealingLR 파라미터 (scheduler_type이 'CosineAnnealingLR'일 때만 사용)
+  cosine_lr_T_max:
     values: [8, 10, 12]
 
   # experiments.md에서 10 epoch이 최적 (line 72)
