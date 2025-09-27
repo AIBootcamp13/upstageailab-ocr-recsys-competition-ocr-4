@@ -134,8 +134,8 @@ early_terminate:
   min_iter: 3
   eta: 2
 
-# 동시 실행 수 제한
-run_cap: 100
+# 동시 실행 수 제한 - 한 번에 하나씩만 실행
+run_cap: 1
 
 # 프로젝트 설정 (환경변수로 오버라이드 가능)
 project: OCR-HRNet-Sweep

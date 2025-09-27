@@ -7,6 +7,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# WandB 환경변수 설정 - 연속 실패 허용 횟수 증가 및 CUDA 메모리 최적화
+os.environ['WANDB_AGENT_MAX_INITIAL_FAILURES'] = '30'
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
 warnings.filterwarnings(
     "ignore",
     message=r"^pkg_resources is deprecated as an API",
@@ -163,19 +167,26 @@ def get_sweep_config():
 
 def adjust_batch_size_for_memory(image_size, suggested_batch_size):
     """GPU 메모리에 따른 배치 사이즈 자동 조정"""
-    # 더 보수적인 메모리 기반 조정 (HRNet 모델은 메모리 사용량이 많음)
+    # 매우 보수적인 메모리 기반 조정 (OOM 방지를 위해 더 작게 설정)
     memory_mapping = {
-        1280: 2,  # 더 작게 조정
-        1024: 4,  # 더 작게 조정
-        800: 8,   # 더 작게 조정
-        640: 16,  # 더 작게 조정
+        1280: 1,  # 매우 작게 조정
+        1024: 2,  # 매우 작게 조정
+        800: 4,   # 매우 작게 조정
+        640: 8,   # 매우 작게 조정
     }
 
-    max_batch_size = memory_mapping.get(image_size, 8)
+    max_batch_size = memory_mapping.get(image_size, 4)
     return min(suggested_batch_size, max_batch_size)
 
 def train_with_sweep():
     """WandB sweep agent에서 호출되는 학습 함수"""
+
+    # GPU 메모리 정리
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        print(f"GPU memory cleared. Available: {torch.cuda.get_device_properties(0).total_memory // 1024**3}GB")
+
+    print("Starting sweep agent for project: OCRProject")
 
     # WandB 초기화
     wandb.init()
