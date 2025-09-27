@@ -16,6 +16,15 @@ import lightning.pytorch as pl
 import torch
 import hydra
 import wandb
+
+# WandB API 키로 자동 로그인
+wandb_api_key = os.environ.get('WANDB_API_KEY')
+if wandb_api_key:
+    try:
+        wandb.login(key=wandb_api_key)
+        print("WandB 로그인 성공")
+    except Exception as e:
+        print(f"WandB 로그인 실패: {e}")
 from hydra.core.hydra_config import HydraConfig
 from lightning.pytorch.callbacks import (
     LearningRateMonitor,
@@ -165,13 +174,17 @@ def adjust_batch_size_for_memory(image_size, suggested_batch_size):
     max_batch_size = memory_mapping.get(image_size, 16)
     return min(suggested_batch_size, max_batch_size)
 
-@hydra.main(config_path=CONFIG_DIR, config_name='train', version_base='1.2')
-def train_with_sweep(config):
+def train_with_sweep():
     """WandB sweep agent에서 호출되는 학습 함수"""
 
     # WandB 초기화
     wandb.init()
     sweep_config = wandb.config
+
+    # Hydra 설정 로드
+    from hydra import initialize, compose
+    with initialize(config_path=CONFIG_DIR, version_base='1.2'):
+        config = compose(config_name='train')
 
     # Hydra config 오버라이드
     overrides = []
@@ -246,23 +259,22 @@ def train_with_sweep(config):
             if 'models.scheduler.T_max' in sweep_config:
                 overrides.append(f"models.scheduler.T_max={sweep_config['models.scheduler.T_max']}")
 
+    # exp_name 설정 (기본값에 sweep run name 추가)
+    base_exp_name = getattr(config, 'exp_name', 'ocr_training')
+    sweep_exp_name = f"{base_exp_name}_sweep_{wandb.run.name}"
+
     # 기본 설정
     overrides.extend([
         "preset=example",
         f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
-        f"exp_name=sweep_{wandb.run.name}",
+        f"exp_name={sweep_exp_name}",
         "wandb=True"
     ])
 
     # Hydra config 업데이트
+    from omegaconf import OmegaConf
     for override in overrides:
         key, value = override.split('=', 1)
-        keys = key.split('.')
-        current = config
-        for k in keys[:-1]:
-            if k not in current:
-                current[k] = {}
-            current = current[k]
 
         # 타입 변환
         try:
@@ -277,10 +289,12 @@ def train_with_sweep(config):
         except:
             pass
 
-        current[keys[-1]] = value
+        # OmegaConf를 사용한 안전한 설정
+        OmegaConf.set(config, key, value)
 
     # 학습 실행
-    run_dir = Path(HydraConfig.get().runtime.output_dir)
+    import tempfile
+    run_dir = Path(tempfile.mkdtemp(prefix=f"sweep_{wandb.run.name}_"))
     log_dir = Path(getattr(config, "log_dir", run_dir / "logs"))
     log_path = setup_console_logging(log_dir, "train.log")
 
@@ -345,8 +359,13 @@ def train_with_sweep(config):
 
 def run_sweep():
     """WandB sweep 실행"""
-    # WandB 프로젝트 설정
-    project_name = os.environ.get('WANDB_PROJECT', 'OCR-HRNet-Sweep')
+    # train.yaml에서 프로젝트 설정 로드
+    from hydra import initialize, compose
+    with initialize(config_path=CONFIG_DIR, version_base='1.2'):
+        config = compose(config_name='train')
+
+    # WandB 프로젝트 설정 (train.yaml 우선, 환경변수로 오버라이드 가능)
+    project_name = os.environ.get('WANDB_PROJECT', getattr(config, 'project_name', 'OCR-HRNet-Sweep'))
     entity = os.environ.get('WANDB_ENTITY', None)
 
     # Sweep 생성
@@ -354,6 +373,8 @@ def run_sweep():
     sweep_id = wandb.sweep(sweep_config, project=project_name, entity=entity)
 
     print(f"Created sweep: {sweep_id}")
+    print(f"Project: {project_name}")
+    print(f"Sweep URL: https://wandb.ai/{entity if entity else 'your_username'}/{project_name}/sweeps/{sweep_id}")
     print(f"Run: wandb agent {sweep_id}")
 
     return sweep_id
@@ -373,7 +394,18 @@ if __name__ == "__main__":
         print(f"\nTo start the sweep agent, run:")
         print(f"wandb agent {sweep_id}")
     elif args.sweep_id:
-        wandb.agent(args.sweep_id, train_with_sweep, count=args.count)
+        # train.yaml에서 프로젝트 설정 로드
+        from hydra import initialize, compose
+        with initialize(config_path=CONFIG_DIR, version_base='1.2'):
+            config = compose(config_name='train')
+
+        # Entity와 project 정보 추출 (train.yaml 우선)
+        project_name = os.environ.get('WANDB_PROJECT', getattr(config, 'project_name', 'OCR-HRNet-Sweep'))
+        entity = os.environ.get('WANDB_ENTITY', None)
+
+        print(f"Starting sweep agent for project: {project_name}")
+        wandb.agent(args.sweep_id, train_with_sweep, count=args.count,
+                   project=project_name, entity=entity)
     else:
         # 기본 동작: sweep config 출력
         import yaml
