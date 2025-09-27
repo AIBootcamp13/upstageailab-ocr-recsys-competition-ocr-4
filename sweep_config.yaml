@@ -3,7 +3,7 @@
 
 method: bayes  # bayes, grid, random
 metric:
-  name: val/cleval_hmean
+  name: val/hmean
   goal: maximize
 
 parameters:
@@ -109,7 +109,9 @@ parameters:
 
   # experiments.md에서 10 epoch이 최적 (line 72)
   trainer.max_epochs:
-    values: [8, 10, 12]
+    distribution: int_uniform
+    min: 5
+    max: 20
 
   # === CollateFN 파라미터 (데이터 증강에 영향) ===
 

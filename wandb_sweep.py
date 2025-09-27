@@ -57,7 +57,7 @@ def get_sweep_config():
     return {
         'method': 'bayes',
         'metric': {
-            'name': 'val/cleval_hmean',
+            'name': 'val/hmean',
             'goal': 'maximize'
         },
         'parameters': {
@@ -188,8 +188,13 @@ def train_with_sweep():
 
     print("Starting sweep agent for project: OCRProject")
 
+    # 현재 시간으로 run name 생성
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
+    run_name = f"sweep_{timestamp}"
+
     # WandB 초기화
-    wandb.init()
+    wandb.init(name=run_name)
     sweep_config = wandb.config
 
     # Hydra 설정 로드
@@ -378,7 +383,7 @@ def train_with_sweep():
         checkpoint_callback = ModelCheckpoint(
             dirpath=str(checkpoint_dir),
             save_top_k=3,
-            monitor='val/cleval_hmean',
+            monitor='val/hmean',
             mode='max',
         )
 
