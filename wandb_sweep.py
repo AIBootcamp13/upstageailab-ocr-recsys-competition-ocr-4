@@ -368,6 +368,10 @@ def train_with_sweep():
 
         model_module, data_module = get_pl_modules_by_cfg(config)
 
+        # 기존 WandB 런이 있다면 종료 (런 재사용 경고 방지)
+        if wandb.run is not None:
+            wandb.finish()
+
         # WandB Logger 사용
         from lightning.pytorch.loggers import WandbLogger
         logger = WandbLogger(
