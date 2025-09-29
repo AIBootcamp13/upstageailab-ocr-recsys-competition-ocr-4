@@ -38,6 +38,10 @@ transforms:
         p: 1.0
       - _target_: albumentations.HorizontalFlip
         p: 0.5
+      - _target_: albumentations.RandomBrightnessContrast
+        brightness_limit: 0.2
+        contrast_limit: 0.2
+        p: 0.5
       - _target_: albumentations.Normalize
         mean: [0.485, 0.456, 0.406]
         std: [0.229, 0.224, 0.225]
