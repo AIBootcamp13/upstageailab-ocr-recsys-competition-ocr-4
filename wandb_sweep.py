@@ -302,9 +302,10 @@ def train_with_sweep():
             if 'cosine_lr_T_max' in sweep_config:
                 overrides.append(f"models.scheduler.T_max={sweep_config['cosine_lr_T_max']}")
 
-    # exp_name 설정 (기본값에 sweep run name 추가)
+    # exp_name 설정 (기본값에 timestamp 추가, sweep 중복 방지)
     base_exp_name = getattr(config, 'exp_name', 'ocr_training')
-    sweep_exp_name = f"{base_exp_name}_sweep_{wandb.run.name}"
+    # wandb.run.name이 이미 "sweep_timestamp" 형식이므로 그대로 사용
+    sweep_exp_name = f"{base_exp_name}_{wandb.run.name}"
 
     # 기본 설정
     overrides.extend([
