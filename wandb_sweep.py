@@ -415,6 +415,27 @@ def train_with_sweep():
             data_module,
         )
 
+        # 베스트 체크포인트 로드 및 CSV 제출파일 생성
+        best_checkpoint = checkpoint_callback.best_model_path
+        if best_checkpoint:
+            checkpoint = torch.load(best_checkpoint, map_location='cpu')
+            best_epoch = checkpoint.get("epoch")
+            state_dict = checkpoint.get("state_dict", checkpoint)
+            model_module.load_state_dict(state_dict)
+
+            # CSV 생성을 위한 predict 실행
+            trainer.predict(model_module, data_module)
+
+            if getattr(model_module, "last_submission_paths", None):
+                paths = model_module.last_submission_paths
+                print(f"Submission JSON saved to: {paths['json']}")
+                if best_epoch is not None:
+                    print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
+                else:
+                    print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
+        else:
+            print("Model checkpoint was not created; skipping submission generation.")
+
         # 최종 메트릭 로깅
         if hasattr(model_module, 'test_metrics'):
             test_metrics = model_module.test_metrics
