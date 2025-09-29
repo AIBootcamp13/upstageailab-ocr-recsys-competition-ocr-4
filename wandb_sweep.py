@@ -433,6 +433,29 @@ def train_with_sweep():
                     print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
                 else:
                     print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
+
+                # CSV 파일을 WandB artifact로 업로드
+                try:
+                    import os
+                    csv_path = paths['csv']
+                    if os.path.exists(csv_path):
+                        # artifact 생성
+                        artifact = wandb.Artifact(
+                            name=f"submission_csv_{wandb.run.id}",
+                            type="submission",
+                            description=f"CSV submission file from epoch {best_epoch if best_epoch is not None else 'unknown'}"
+                        )
+
+                        # CSV 파일 추가
+                        artifact.add_file(csv_path, name="submission.csv")
+
+                        # artifact 업로드
+                        wandb.log_artifact(artifact)
+                        print(f"Submission CSV uploaded as WandB artifact: submission_csv_{wandb.run.id}")
+                    else:
+                        print(f"CSV file not found at: {csv_path}")
+                except Exception as e:
+                    print(f"Failed to upload CSV as artifact: {e}")
         else:
             print("Model checkpoint was not created; skipping submission generation.")
 
