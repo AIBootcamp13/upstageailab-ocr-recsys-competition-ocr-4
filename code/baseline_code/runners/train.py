@@ -73,8 +73,10 @@ def train(config):
         checkpoint_callback = ModelCheckpoint(
             dirpath=str(checkpoint_dir),
             save_top_k=3,
-            monitor='val/loss',
-            mode='min',
+            # monitor='val/loss',
+            # mode='min',
+            monitor='val/hmean',
+            mode='max',
         )
 
         callbacks = [
