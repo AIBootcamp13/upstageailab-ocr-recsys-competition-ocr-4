@@ -189,3 +189,16 @@ mode='max',
 - 리더보드 성과: H-Mean 0.9845 / Precision 0.9851 / Recall 0.9845
 - 체크포인트: `outputs/2025-09-29/15-52-48/checkpoints/best_model.ckpt`
 - 메모: **현재 최고 성능 달성**, 내부 평가와 리더보드 점수 모두 0.98+ 달성, WandB Sweep 기반 자동 하이퍼파라미터 튜닝의 효과 입증
+
+### 2025-09-29 — hrnet_w44_1024_rbc (epoch 13)
+- _target_: albumentations.RandomBrightnessContrast
+brightness_limit: 0.2
+contrast_limit: 0.2
+p: 0.5
+       test/hmean            0.984672486782074
+     test/precision         0.9834803938865662
+       test/recall          0.9864917397499084
+Leaderboard:
+H-Mean	Precision	Recall
+0.9863	0.9868	0.9862
+

@@ -28,3 +28,68 @@ experiments.md 에서 최근 베스트 실험을 DBNet++와 DBNet 각각의 방�
 
 train.py를 사용해서 모델 훈련을 해서 개선 아이디어를 참고하여 평가 점수를 개선해라. train.py를 실행하면 모델 훈련후 평가 점수 계산도 하도록 되어 있다. 서버 사양이 아슬아슬하므로 한번에 하나의 실험씩만 실행해라.
 프로그램 실행시 포그라운드로 실행하고 타임아웃은 4시간으로 실행해야한다.
+
+위에 명령어로 실행했을때 결과가 아래와 같다. 따라서 @experiments.md 에 실험결과를 추가해줘.
+
+내부 평가 점수 :
+       test/hmean           0.9823185205459595
+     test/precision         0.9821447134017944
+       test/recall          0.9831848740577698
+
+리더보드 :
+H-Mean /Precision / Recall
+0.9845 / 0.9851 / 0.9845
+
+추가학습하기 : 맥스 에폭20으로 하면 에폭10부터 이어서 진행됨
+  "resume='outputs/2025-09-29/12-26-32/checkpoints/epoch=9-step=16360.ckpt'" \
+
+- _target_: albumentations.RandomBrightnessContrast
+    brightness_limit: 0.2
+    contrast_limit: 0.2
+    p: 0.5
+Nomalize 위에다
+노멀라이즈 하기전에 하라고 하더라구요
+
+
+
+uv run python code/baseline_code/runners/train.py \
+  preset=example \
+  "resume='outputs/2025-09-29/19-52-20/checkpoints/epoch=12-step=21268.ckpt'" \
+  models.encoder.model_name=hrnet_w44 \
+  models.encoder.select_features=[1,2,3,4] \
+  models.decoder.in_channels=[128,256,512,1024] \
+  transforms.train_transform.transforms.0.max_size=1024 \
+  transforms.train_transform.transforms.1.min_width=1024 \
+  transforms.train_transform.transforms.1.min_height=1024 \
+  transforms.val_transform.transforms.0.max_size=1024 \
+  transforms.val_transform.transforms.1.min_width=1024 \
+  transforms.val_transform.transforms.1.min_height=1024 \
+  transforms.test_transform.transforms.0.max_size=1024 \
+  transforms.test_transform.transforms.1.min_width=1024 \
+  transforms.test_transform.transforms.1.min_height=1024 \
+  dataloaders.train_dataloader.batch_size=2 \
+  dataloaders.val_dataloader.batch_size=2 \
+  dataloaders.test_dataloader.batch_size=2 \
+  models.head.postprocess.thresh=0.23105253214239585 \
+  models.head.postprocess.box_thresh=0.4324259445084524 \
+  models.head.postprocess.box_unclip_ratio=1.4745700672729625 \
+  models.head.postprocess.polygon_unclip_ratio=1.9770744341268096 \
+  models.loss.negative_ratio=2.824132345320219 \
+  models.loss.prob_map_loss_weight=3.591196851512631 \
+  models.loss.thresh_map_loss_weight=8.028627860143937 \
+  models.loss.binary_map_loss_weight=0.6919312670387725 \
+  models.head.k=45 \
+  models.optimizer._target_=torch.optim.AdamW \
+  models.optimizer.lr=0.0013358832166152786 \
+  models.optimizer.weight_decay=0.0003571900294890783 \
+  models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR \
+  ~models.scheduler.step_size \
+  ~models.scheduler.gamma \
+  +models.scheduler.T_max=10 \
+  trainer.max_epochs=20 \
+  collate_fn.shrink_ratio=0.428584820771695 \
+  collate_fn.thresh_max=0.7506908133484191 \
+  collate_fn.thresh_min=0.33967147700431666 \
+  exp_name=hrnet_w44_1024_rbc \
+  wandb=true
+
