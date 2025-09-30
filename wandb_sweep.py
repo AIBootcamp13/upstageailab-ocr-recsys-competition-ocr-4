@@ -517,7 +517,8 @@ def train_with_sweep():
         end_time = datetime.now()
         elapsed = end_time - start_time
         print(f"[{end_time:%Y-%m-%d %H:%M:%S}] Training run finished. Duration: {elapsed}", flush=True)
-        wandb.finish()
+        # wandb.finish() 제거: sweep agent가 자동으로 run을 관리하므로 명시적 finish() 호출 불필요
+        # 명시적으로 finish()를 호출하면 sweep이 조기 종료될 수 있음
 
 def run_sweep():
     """WandB sweep 실행"""
