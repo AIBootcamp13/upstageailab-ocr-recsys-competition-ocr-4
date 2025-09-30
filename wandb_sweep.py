@@ -294,6 +294,8 @@ def train_with_sweep():
         if scheduler_target == 'torch.optim.lr_scheduler.StepLR':
             # StepLR로 완전 교체
             overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.StepLR")
+            # T_max 파라미터 명시적 제거
+            overrides.append("~models.scheduler.T_max")
             if 'models.scheduler.step_size' in sweep_config:
                 overrides.append(f"models.scheduler.step_size={sweep_config['models.scheduler.step_size']}")
             if 'models.scheduler.gamma' in sweep_config:
@@ -301,6 +303,9 @@ def train_with_sweep():
         elif scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
             # CosineAnnealingLR로 완전 교체 - T_max만 설정
             overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR")
+            # step_size, gamma 파라미터 명시적 제거
+            overrides.append("~models.scheduler.step_size")
+            overrides.append("~models.scheduler.gamma")
             if 'models.scheduler.T_max' in sweep_config:
                 overrides.append(f"models.scheduler.T_max={sweep_config['models.scheduler.T_max']}")
 
@@ -320,13 +325,21 @@ def train_with_sweep():
     # Hydra config 업데이트
     from omegaconf import OmegaConf
 
-    # 스케줄러가 CosineAnnealingLR인 경우 기존 StepLR 파라미터 제거
+    # 스케줄러 파라미터 정리 - 사용하지 않는 파라미터 제거
     scheduler_target = sweep_config.get('models.scheduler._target_')
     if scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
+        # CosineAnnealingLR 사용시 StepLR 파라미터 제거
         if hasattr(config.models.scheduler, 'step_size'):
+            OmegaConf.set_struct(config.models.scheduler, False)
             delattr(config.models.scheduler, 'step_size')
         if hasattr(config.models.scheduler, 'gamma'):
+            OmegaConf.set_struct(config.models.scheduler, False)
             delattr(config.models.scheduler, 'gamma')
+    elif scheduler_target == 'torch.optim.lr_scheduler.StepLR':
+        # StepLR 사용시 CosineAnnealingLR 파라미터 제거
+        if hasattr(config.models.scheduler, 'T_max'):
+            OmegaConf.set_struct(config.models.scheduler, False)
+            delattr(config.models.scheduler, 'T_max')
 
     for override in overrides:
         # ~ 또는 + 로 시작하는 특수 overrides는 건너뜀 (Hydra가 직접 처리)
