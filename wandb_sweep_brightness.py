@@ -138,9 +138,7 @@ def train_with_sweep():
 
         # Scheduler (CosineAnnealingLR)
         "models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR",
-        "~models.scheduler.step_size",
-        "~models.scheduler.gamma",
-        "+models.scheduler.T_max=10",
+        "models.scheduler.T_max=10",
 
         # Epochs
         "trainer.max_epochs=13",
@@ -172,6 +170,24 @@ def train_with_sweep():
     overrides.append(f"exp_name={sweep_exp_name}")
 
     # Hydra config 업데이트
+    from omegaconf import OmegaConf
+
+    # 스케줄러 파라미터 정리 - CosineAnnealingLR 고정이므로 StepLR 파라미터 제거
+    if hasattr(config.models.scheduler, 'step_size'):
+        OmegaConf.set_struct(config.models.scheduler, False)
+        delattr(config.models.scheduler, 'step_size')
+        print("Removed step_size from scheduler config")
+    if hasattr(config.models.scheduler, 'gamma'):
+        OmegaConf.set_struct(config.models.scheduler, False)
+        delattr(config.models.scheduler, 'gamma')
+        print("Removed gamma from scheduler config")
+
+    # T_max가 없으면 추가 (CosineAnnealingLR 필수 파라미터)
+    if not hasattr(config.models.scheduler, 'T_max'):
+        OmegaConf.set_struct(config.models.scheduler, False)
+        config.models.scheduler.T_max = 10
+        print("Added T_max=10 to scheduler config")
+
     for override in overrides:
         # ~ 또는 + 로 시작하는 특수 overrides는 건너뜀 (Hydra가 직접 처리)
         if override.startswith('~') or override.startswith('+'):
@@ -204,10 +220,20 @@ def train_with_sweep():
             keys = key.split('.')
             current = config
             for k in keys[:-1]:
-                if k not in current:
-                    current[k] = OmegaConf.create({})
-                current = current[k]
-            current[keys[-1]] = value
+                # 리스트 인덱스 처리 (예: transforms[0])
+                if k.isdigit():
+                    current = current[int(k)]
+                else:
+                    if k not in current:
+                        current[k] = OmegaConf.create({})
+                    current = current[k]
+
+            # 마지막 키 처리
+            last_key = keys[-1]
+            if last_key.isdigit():
+                current[int(last_key)] = value
+            else:
+                current[last_key] = value
         except Exception as e:
             print(f"Warning: Failed to set {key}={value}: {e}")
             continue
@@ -242,9 +268,13 @@ def train_with_sweep():
             config=dict(sweep_config)
         )
 
-        # checkpoint_dir 직접 설정
+        # checkpoint_dir 직접 설정 (HydraConfig 보간 문제 해결)
         checkpoint_dir = run_dir / "checkpoints"
         config.checkpoint_dir = str(checkpoint_dir)
+
+        # submission_dir 직접 설정 (HydraConfig 보간 문제 해결)
+        submission_dir = run_dir / "submissions"
+        config.submission_dir = str(submission_dir)
 
         checkpoint_callback = ModelCheckpoint(
             dirpath=str(checkpoint_dir),

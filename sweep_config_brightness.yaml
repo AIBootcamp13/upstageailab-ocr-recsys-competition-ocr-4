@@ -12,16 +12,16 @@ parameters:
   # 밝기 조정 범위 (현재값: 0.2)
   brightness_limit:
     min: 0.1
-    max: 0.3
+    max: 0.5
 
   # 대비 조정 범위 (현재값: 0.2)
   contrast_limit:
     min: 0.1
-    max: 0.3
+    max: 0.5
 
   # augmentation 적용 확률 (현재값: 0.5)
   brightness_contrast_p:
-    min: 0.3
+    min: 0.1
     max: 0.7
 
 # 실행 설정

@@ -374,10 +374,20 @@ def train_with_sweep():
             keys = key.split('.')
             current = config
             for k in keys[:-1]:
-                if k not in current:
-                    current[k] = OmegaConf.create({})
-                current = current[k]
-            current[keys[-1]] = value
+                # 리스트 인덱스 처리 (예: transforms[0])
+                if k.isdigit():
+                    current = current[int(k)]
+                else:
+                    if k not in current:
+                        current[k] = OmegaConf.create({})
+                    current = current[k]
+
+            # 마지막 키 처리
+            last_key = keys[-1]
+            if last_key.isdigit():
+                current[int(last_key)] = value
+            else:
+                current[last_key] = value
         except Exception as e:
             print(f"Warning: Failed to set {key}={value}: {e}")
             continue
@@ -415,6 +425,10 @@ def train_with_sweep():
         # checkpoint_dir 직접 설정 (HydraConfig 보간 문제 해결)
         checkpoint_dir = run_dir / "checkpoints"
         config.checkpoint_dir = str(checkpoint_dir)
+
+        # submission_dir 직접 설정 (HydraConfig 보간 문제 해결)
+        submission_dir = run_dir / "submissions"
+        config.submission_dir = str(submission_dir)
 
         checkpoint_callback = ModelCheckpoint(
             dirpath=str(checkpoint_dir),
