@@ -97,15 +97,17 @@ def train(config):
         )
 
         best_checkpoint = checkpoint_callback.best_model_path
+        best_epoch = None
         if best_checkpoint:
             checkpoint = torch.load(best_checkpoint, map_location='cpu')
             best_epoch = checkpoint.get("epoch")
-            state_dict = checkpoint.get("state_dict", checkpoint)
-            model_module.load_state_dict(state_dict)
+            print(f"Using best checkpoint from epoch: {best_epoch}")
+            print(f"Best checkpoint path: {best_checkpoint}")
 
         trainer.test(
             model_module,
             data_module,
+            ckpt_path=best_checkpoint,
         )
 
         if best_checkpoint:
