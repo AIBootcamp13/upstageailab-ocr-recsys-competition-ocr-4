@@ -123,9 +123,41 @@ def train(config):
                     print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
                 else:
                     print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
+
+                # WandB가 활성화된 경우 CSV 파일을 artifact로 업로드
+                if config.get("wandb") and hasattr(logger, 'experiment'):
+                    try:
+                        import wandb
+                        csv_path = paths['csv']
+                        if os.path.exists(csv_path):
+                            # artifact 생성
+                            artifact = wandb.Artifact(
+                                name=f"submission_csv_{logger.experiment.id}",
+                                type="submission",
+                                description=f"CSV submission file from epoch {best_epoch if best_epoch is not None else 'unknown'}"
+                            )
+
+                            # CSV 파일 추가
+                            artifact.add_file(csv_path, name="submission.csv")
+
+                            # artifact 업로드
+                            wandb.log_artifact(artifact)
+                            print(f"Submission CSV uploaded as WandB artifact: submission_csv_{logger.experiment.id}")
+                        else:
+                            print(f"CSV file not found at: {csv_path}")
+                    except Exception as e:
+                        print(f"Failed to upload CSV as artifact: {e}")
         else:
             print("Model checkpoint was not created; skipping submission generation.")
     finally:
+        # WandB 정리 (sweep에서 실행되지 않을 때만)
+        if config.get("wandb") and not os.environ.get('WANDB_SWEEP_ID'):
+            try:
+                import wandb
+                wandb.finish()
+            except Exception:
+                pass  # WandB 종료 중 오류 무시
+
         end_time = datetime.now()
         elapsed = end_time - start_time
         print(f"[{end_time:%Y-%m-%d %H:%M:%S}] Training run finished. Duration: {elapsed}", flush=True)

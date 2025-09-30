@@ -288,19 +288,21 @@ def train_with_sweep():
         if sweep_key in sweep_config:
             overrides.append(f"{config_key}={sweep_config[sweep_key]}")
 
-    # 스케줄러 설정 - 새로운 파라미터 구조 사용
-    scheduler_type = sweep_config.get('scheduler_type')
-    if scheduler_type:
-        if scheduler_type == 'StepLR':
+    # 스케줄러 설정 - 완전한 스케줄러 교체
+    scheduler_target = sweep_config.get('models.scheduler._target_')
+    if scheduler_target:
+        if scheduler_target == 'torch.optim.lr_scheduler.StepLR':
+            # StepLR로 완전 교체
             overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.StepLR")
-            if 'step_lr_step_size' in sweep_config:
-                overrides.append(f"models.scheduler.step_size={sweep_config['step_lr_step_size']}")
-            if 'step_lr_gamma' in sweep_config:
-                overrides.append(f"models.scheduler.gamma={sweep_config['step_lr_gamma']}")
-        elif scheduler_type == 'CosineAnnealingLR':
+            if 'models.scheduler.step_size' in sweep_config:
+                overrides.append(f"models.scheduler.step_size={sweep_config['models.scheduler.step_size']}")
+            if 'models.scheduler.gamma' in sweep_config:
+                overrides.append(f"models.scheduler.gamma={sweep_config['models.scheduler.gamma']}")
+        elif scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
+            # CosineAnnealingLR로 완전 교체 - T_max만 설정
             overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR")
-            if 'cosine_lr_T_max' in sweep_config:
-                overrides.append(f"models.scheduler.T_max={sweep_config['cosine_lr_T_max']}")
+            if 'models.scheduler.T_max' in sweep_config:
+                overrides.append(f"models.scheduler.T_max={sweep_config['models.scheduler.T_max']}")
 
     # exp_name 설정 (기본값에 timestamp 추가, sweep 중복 방지)
     base_exp_name = getattr(config, 'exp_name', 'ocr_training')
@@ -317,7 +319,23 @@ def train_with_sweep():
 
     # Hydra config 업데이트
     from omegaconf import OmegaConf
+
+    # 스케줄러가 CosineAnnealingLR인 경우 기존 StepLR 파라미터 제거
+    scheduler_target = sweep_config.get('models.scheduler._target_')
+    if scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
+        if hasattr(config.models.scheduler, 'step_size'):
+            delattr(config.models.scheduler, 'step_size')
+        if hasattr(config.models.scheduler, 'gamma'):
+            delattr(config.models.scheduler, 'gamma')
+
     for override in overrides:
+        # ~ 또는 + 로 시작하는 특수 overrides는 건너뜀 (Hydra가 직접 처리)
+        if override.startswith('~') or override.startswith('+'):
+            continue
+
+        if '=' not in override:
+            continue
+
         key, value = override.split('=', 1)
 
         # 타입 변환 (더 안전한 방식)
@@ -436,7 +454,6 @@ def train_with_sweep():
 
                 # CSV 파일을 WandB artifact로 업로드
                 try:
-                    import os
                     csv_path = paths['csv']
                     if os.path.exists(csv_path):
                         # artifact 생성
