@@ -1,0 +1,38 @@
+# WandB Sweep Configuration for RandomBrightnessContrast Optimization
+# 베스트 파라미터는 고정하고, RandomBrightnessContrast augmentation만 최적화
+
+method: bayes  # bayes, grid, random
+metric:
+  name: val/hmean
+  goal: maximize
+
+parameters:
+  # RandomBrightnessContrast 파라미터 (train_transform.transforms[3])
+
+  # 밝기 조정 범위 (현재값: 0.2)
+  brightness_limit:
+    min: 0.1
+    max: 0.3
+
+  # 대비 조정 범위 (현재값: 0.2)
+  contrast_limit:
+    min: 0.1
+    max: 0.3
+
+  # augmentation 적용 확률 (현재값: 0.5)
+  brightness_contrast_p:
+    min: 0.3
+    max: 0.7
+
+# 실행 설정
+early_terminate:
+  type: hyperband
+  min_iter: 3
+  eta: 2
+
+# 동시 실행 수 제한 - 한 번에 하나씩만 실행
+run_cap: 1
+
+# 프로젝트 설정 (환경변수로 오버라이드 가능)
+project: OCR-Brightness-Sweep
+entity: null  # WANDB_ENTITY 환경변수 사용
