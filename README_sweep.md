@@ -41,13 +41,13 @@ WANDB_MODE=online  # online/offline/disabled
 
 ```bash
 # 1. Sweep 생성
-python wandb_sweep.py --create-sweep
+uv run python wandb_sweep.py --create-sweep
 
 # 2. Agent 실행 (출력된 sweep ID 사용)
 wandb agent your_sweep_id
 
 # 또는 한 번에 실행
-python wandb_sweep.py --sweep-id your_sweep_id --count 50
+uv run python wandb_sweep.py --sweep-id your_sweep_id --count 500
 ```
 
 ### 방법 2: YAML 파일 사용
