@@ -66,15 +66,15 @@ def convert_sweep_value(value):
     return value
 
 def load_sweep_config():
-    """sweep_config_brightness.yaml 파일에서 설정 로드"""
+    """sweep_config_augment.yaml 파일에서 설정 로드"""
     import yaml
 
-    config_path = PROJECT_ROOT / "sweep_config_brightness.yaml"
+    config_path = PROJECT_ROOT / "sweep_config_augment.yaml"
 
     if not config_path.exists():
         raise FileNotFoundError(
             f"Sweep config file not found: {config_path}\n"
-            f"Please ensure 'sweep_config_brightness.yaml' exists in the project root."
+            f"Please ensure 'sweep_config_augment.yaml' exists in the project root."
         )
 
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -91,11 +91,11 @@ def train_with_sweep():
         torch.cuda.empty_cache()
         print(f"GPU memory cleared. Available: {torch.cuda.get_device_properties(0).total_memory // 1024**3}GB")
 
-    print("Starting sweep agent for RandomBrightnessContrast optimization")
+    print("Starting sweep agent for Augmentation optimization")
 
     # 현재 시간으로 run name 생성
     timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
-    run_name = f"brightness_sweep_{timestamp}"
+    run_name = f"augment_sweep_{timestamp}"
 
     # WandB 초기화
     wandb.init(name=run_name)
@@ -172,23 +172,156 @@ def train_with_sweep():
     ]
 
     # ==========================================
-    # RandomBrightnessContrast 파라미터만 sweep
+    # 13개 Augmentation 파라미터 sweep
     # ==========================================
+
+    # 1. RandomBrightnessContrast (transforms[3])
     brightness_limit = sweep_config.get('brightness_limit', 0.2)
     contrast_limit = sweep_config.get('contrast_limit', 0.2)
-    brightness_contrast_p = sweep_config.get('brightness_contrast_p', 0.5)
-
-    # transforms.train_transform.transforms[3]가 RandomBrightnessContrast
+    brightness_contrast_p = sweep_config.get('brightness_contrast_p', 0.3)
     overrides.extend([
         f"transforms.train_transform.transforms.3.brightness_limit={brightness_limit}",
         f"transforms.train_transform.transforms.3.contrast_limit={contrast_limit}",
         f"transforms.train_transform.transforms.3.p={brightness_contrast_p}",
     ])
 
-    print(f"RandomBrightnessContrast params: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}")
+    # 2. ColorJitter (transforms[4])
+    color_jitter_brightness = sweep_config.get('color_jitter_brightness', 0.2)
+    color_jitter_contrast = sweep_config.get('color_jitter_contrast', 0.2)
+    color_jitter_saturation = sweep_config.get('color_jitter_saturation', 0.2)
+    color_jitter_hue = sweep_config.get('color_jitter_hue', 0.1)
+    color_jitter_p = sweep_config.get('color_jitter_p', 0.3)
+    overrides.extend([
+        f"transforms.train_transform.transforms.4.brightness={color_jitter_brightness}",
+        f"transforms.train_transform.transforms.4.contrast={color_jitter_contrast}",
+        f"transforms.train_transform.transforms.4.saturation={color_jitter_saturation}",
+        f"transforms.train_transform.transforms.4.hue={color_jitter_hue}",
+        f"transforms.train_transform.transforms.4.p={color_jitter_p}",
+    ])
+
+    # 3. RandomGamma (transforms[5])
+    gamma_limit_lower = int(sweep_config.get('gamma_limit_lower', 80))
+    gamma_limit_upper = int(sweep_config.get('gamma_limit_upper', 120))
+    random_gamma_p = sweep_config.get('random_gamma_p', 0.3)
+    overrides.extend([
+        f"transforms.train_transform.transforms.5.gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}]",
+        f"transforms.train_transform.transforms.5.p={random_gamma_p}",
+    ])
+
+    # 4. HueSaturationValue (transforms[6])
+    hue_shift_limit = int(sweep_config.get('hue_shift_limit', 20))
+    sat_shift_limit = int(sweep_config.get('sat_shift_limit', 30))
+    val_shift_limit = int(sweep_config.get('val_shift_limit', 20))
+    hsv_p = sweep_config.get('hsv_p', 0.3)
+    overrides.extend([
+        f"transforms.train_transform.transforms.6.hue_shift_limit={hue_shift_limit}",
+        f"transforms.train_transform.transforms.6.sat_shift_limit={sat_shift_limit}",
+        f"transforms.train_transform.transforms.6.val_shift_limit={val_shift_limit}",
+        f"transforms.train_transform.transforms.6.p={hsv_p}",
+    ])
+
+    # 5. GaussianBlur (transforms[7])
+    gaussian_blur_limit = int(sweep_config.get('gaussian_blur_limit', 5))
+    # blur_limit은 홀수여야 하므로 조정
+    if gaussian_blur_limit % 2 == 0:
+        gaussian_blur_limit += 1
+    gaussian_blur_p = sweep_config.get('gaussian_blur_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.7.blur_limit=[3,{gaussian_blur_limit}]",
+        f"transforms.train_transform.transforms.7.p={gaussian_blur_p}",
+    ])
+
+    # 6. MotionBlur (transforms[8])
+    motion_blur_limit = int(sweep_config.get('motion_blur_limit', 5))
+    if motion_blur_limit % 2 == 0:
+        motion_blur_limit += 1
+    motion_blur_p = sweep_config.get('motion_blur_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.8.blur_limit=[3,{motion_blur_limit}]",
+        f"transforms.train_transform.transforms.8.p={motion_blur_p}",
+    ])
+
+    # 7. GaussNoise (transforms[9])
+    gauss_noise_std_lower = sweep_config.get('gauss_noise_std_lower', 0.02)
+    gauss_noise_std_upper = sweep_config.get('gauss_noise_std_upper', 0.08)
+    gauss_noise_p = sweep_config.get('gauss_noise_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.9.std_range=[{gauss_noise_std_lower},{gauss_noise_std_upper}]",
+        f"transforms.train_transform.transforms.9.p={gauss_noise_p}",
+    ])
+
+    # 8. ImageCompression (transforms[10])
+    compression_quality_lower = int(sweep_config.get('compression_quality_lower', 75))
+    compression_quality_upper = int(sweep_config.get('compression_quality_upper', 100))
+    image_compression_p = sweep_config.get('image_compression_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.10.quality_range=[{compression_quality_lower},{compression_quality_upper}]",
+        f"transforms.train_transform.transforms.10.p={image_compression_p}",
+    ])
+
+    # 9. Sharpen (transforms[11])
+    sharpen_alpha_lower = sweep_config.get('sharpen_alpha_lower', 0.2)
+    sharpen_alpha_upper = sweep_config.get('sharpen_alpha_upper', 0.5)
+    sharpen_lightness_lower = sweep_config.get('sharpen_lightness_lower', 0.5)
+    sharpen_lightness_upper = sweep_config.get('sharpen_lightness_upper', 1.0)
+    sharpen_p = sweep_config.get('sharpen_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.11.alpha=[{sharpen_alpha_lower},{sharpen_alpha_upper}]",
+        f"transforms.train_transform.transforms.11.lightness=[{sharpen_lightness_lower},{sharpen_lightness_upper}]",
+        f"transforms.train_transform.transforms.11.p={sharpen_p}",
+    ])
+
+    # 10. Downscale (transforms[12])
+    downscale_lower = sweep_config.get('downscale_lower', 0.75)
+    downscale_upper = sweep_config.get('downscale_upper', 0.95)
+    downscale_p = sweep_config.get('downscale_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.12.scale_range=[{downscale_lower},{downscale_upper}]",
+        f"transforms.train_transform.transforms.12.p={downscale_p}",
+    ])
+
+    # 11. RandomShadow (transforms[13])
+    shadow_num_lower = int(sweep_config.get('shadow_num_lower', 1))
+    shadow_num_upper = int(sweep_config.get('shadow_num_upper', 2))
+    shadow_dimension = int(sweep_config.get('shadow_dimension', 5))
+    random_shadow_p = sweep_config.get('random_shadow_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.13.num_shadows_limit=[{shadow_num_lower},{shadow_num_upper}]",
+        f"transforms.train_transform.transforms.13.shadow_dimension={shadow_dimension}",
+        f"transforms.train_transform.transforms.13.p={random_shadow_p}",
+    ])
+
+    # 12. PlasmaShadow (transforms[14])
+    plasma_shadow_intensity_lower = sweep_config.get('plasma_shadow_intensity_lower', 0.3)
+    plasma_shadow_intensity_upper = sweep_config.get('plasma_shadow_intensity_upper', 0.7)
+    plasma_roughness = sweep_config.get('plasma_roughness', 3.0)
+    plasma_shadow_p = sweep_config.get('plasma_shadow_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.14.shadow_intensity_range=[{plasma_shadow_intensity_lower},{plasma_shadow_intensity_upper}]",
+        f"transforms.train_transform.transforms.14.roughness={plasma_roughness}",
+        f"transforms.train_transform.transforms.14.p={plasma_shadow_p}",
+    ])
+
+    # 13. RandomFog (transforms[15])
+    fog_coef_lower = sweep_config.get('fog_coef_lower', 0.1)
+    fog_coef_upper = sweep_config.get('fog_coef_upper', 0.3)
+    fog_alpha_coef = sweep_config.get('fog_alpha_coef', 0.08)
+    random_fog_p = sweep_config.get('random_fog_p', 0.2)
+    overrides.extend([
+        f"transforms.train_transform.transforms.15.fog_coef_range=[{fog_coef_lower},{fog_coef_upper}]",
+        f"transforms.train_transform.transforms.15.alpha_coef={fog_alpha_coef}",
+        f"transforms.train_transform.transforms.15.p={random_fog_p}",
+    ])
+
+    print(f"Augmentation params configured:")
+    print(f"  RandomBrightnessContrast: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}")
+    print(f"  ColorJitter: brightness={color_jitter_brightness}, contrast={color_jitter_contrast}, p={color_jitter_p}")
+    print(f"  RandomGamma: gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}], p={random_gamma_p}")
+    print(f"  GaussianBlur: blur_limit={gaussian_blur_limit}, p={gaussian_blur_p}")
+    print(f"  MotionBlur: blur_limit={motion_blur_limit}, p={motion_blur_p}")
 
     # exp_name 설정
-    sweep_exp_name = f"brightness_sweep_{wandb.run.name}"
+    sweep_exp_name = f"augment_sweep_{wandb.run.name}"
     overrides.append(f"exp_name={sweep_exp_name}")
 
     # Hydra config 업데이트
@@ -271,7 +404,7 @@ def train_with_sweep():
         # WandB Logger 사용
         from lightning.pytorch.loggers import WandbLogger
         logger = WandbLogger(
-            project=os.environ.get('WANDB_PROJECT', 'OCR-Brightness-Sweep'),
+            project=os.environ.get('WANDB_PROJECT', 'OCR-Augment-Sweep'),
             name=f"{sweep_exp_name}",
             config=dict(sweep_config)
         )
@@ -370,17 +503,17 @@ def train_with_sweep():
         # 명시적으로 finish()를 호출하면 sweep이 조기 종료될 수 있음
 
 def run_sweep():
-    """WandB sweep 실행 - sweep_config_brightness.yaml 파일 사용"""
+    """WandB sweep 실행 - sweep_config_augment.yaml 파일 사용"""
     # train.yaml에서 프로젝트 설정 로드
     from hydra import initialize, compose
     with initialize(config_path=CONFIG_DIR, version_base='1.2'):
         config = compose(config_name='train')
 
-    # sweep_config_brightness.yaml 파일에서 설정 로드
+    # sweep_config_augment.yaml 파일에서 설정 로드
     sweep_config = load_sweep_config()
 
     # WandB 프로젝트 설정 (YAML 파일에서 가져오되, 환경변수로 오버라이드 가능)
-    project_name = os.environ.get('WANDB_PROJECT', sweep_config.get('project', 'OCR-Brightness-Sweep'))
+    project_name = os.environ.get('WANDB_PROJECT', sweep_config.get('project', 'OCR-Augment-Sweep'))
     entity = os.environ.get('WANDB_ENTITY', sweep_config.get('entity', None))
 
     # Sweep 생성
@@ -396,7 +529,7 @@ def run_sweep():
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='WandB Sweep for RandomBrightnessContrast optimization')
+    parser = argparse.ArgumentParser(description='WandB Sweep for Augmentation optimization')
     parser.add_argument('--create-sweep', action='store_true', help='Create new sweep')
     parser.add_argument('--sweep-id', type=str, help='Existing sweep ID to join')
     parser.add_argument('--count', type=int, default=20, help='Number of runs')
@@ -414,7 +547,7 @@ if __name__ == "__main__":
             config = compose(config_name='train')
 
         # Entity와 project 정보 추출
-        project_name = os.environ.get('WANDB_PROJECT', 'OCR-Brightness-Sweep')
+        project_name = os.environ.get('WANDB_PROJECT', 'OCR-Augment-Sweep')
         entity = os.environ.get('WANDB_ENTITY', None)
 
         print(f"Starting sweep agent for project: {project_name}")
@@ -425,10 +558,10 @@ if __name__ == "__main__":
         import yaml
         try:
             sweep_config = load_sweep_config()
-            print("Sweep configuration from sweep_config_brightness.yaml:")
+            print("Sweep configuration from sweep_config_augment.yaml:")
             print(yaml.dump(sweep_config, default_flow_style=False))
             print("\nTo create a sweep:")
-            print("uv run python wandb_sweep_brightness.py --create-sweep")
+            print("uv run python wandb_sweep_augment.py --create-sweep")
         except FileNotFoundError as e:
             print(f"Error: {e}")
             sys.exit(1)
