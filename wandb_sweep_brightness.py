@@ -43,6 +43,28 @@ from ocr.utils.console_logging import setup_console_logging
 
 CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or 'code/baseline_code/configs'
 
+def convert_sweep_value(value):
+    """WandB sweep config 값을 적절한 타입으로 변환"""
+    if not isinstance(value, str):
+        return value
+
+    # bool 변환
+    if value.lower() in ['true', 'false']:
+        return value.lower() == 'true'
+
+    # list 변환
+    if value.startswith('[') and value.endswith(']'):
+        return eval(value)
+
+    # numeric 변환
+    if value.replace('.', '').replace('-', '').replace('e', '').replace('+', '').isdigit():
+        if '.' in value or 'e' in value.lower():
+            return float(value)
+        else:
+            return int(value)
+
+    return value
+
 def load_sweep_config():
     """sweep_config_brightness.yaml 파일에서 설정 로드"""
     import yaml
@@ -199,21 +221,7 @@ def train_with_sweep():
         key, value = override.split('=', 1)
 
         # 타입 변환
-        try:
-            if not isinstance(value, str):
-                pass
-            elif value.lower() in ['true', 'false']:
-                value = value.lower() == 'true'
-            elif value.startswith('[') and value.endswith(']'):
-                value = eval(value)
-            elif value.replace('.', '').replace('-', '').isdigit():
-                if '.' in value:
-                    value = float(value)
-                else:
-                    value = int(value)
-        except Exception as e:
-            print(f"Warning: Type conversion failed for {key}={value}: {e}")
-            pass
+        value = convert_sweep_value(value)
 
         # OmegaConf를 사용한 안전한 설정
         try:
@@ -256,9 +264,9 @@ def train_with_sweep():
 
         model_module, data_module = get_pl_modules_by_cfg(config)
 
-        # 기존 WandB 런이 있다면 종료
-        if wandb.run is not None:
-            wandb.finish()
+        # Sweep agent의 run을 재사용하므로 finish() 호출하지 않음
+        # wandb.finish()를 호출하면 sweep agent의 run이 종료되고,
+        # WandbLogger가 새 run을 만들어서 sweep 연결이 끊어짐
 
         # WandB Logger 사용
         from lightning.pytorch.loggers import WandbLogger

@@ -165,6 +165,28 @@ def get_sweep_config():
         }
     }
 
+def convert_sweep_value(value):
+    """WandB sweep config 값을 적절한 타입으로 변환"""
+    if not isinstance(value, str):
+        return value
+
+    # bool 변환
+    if value.lower() in ['true', 'false']:
+        return value.lower() == 'true'
+
+    # list 변환
+    if value.startswith('[') and value.endswith(']'):
+        return eval(value)
+
+    # numeric 변환
+    if value.replace('.', '').replace('-', '').replace('e', '').replace('+', '').isdigit():
+        if '.' in value or 'e' in value.lower():
+            return float(value)
+        else:
+            return int(value)
+
+    return value
+
 def adjust_batch_size_for_memory(image_size, suggested_batch_size):
     """GPU 메모리에 따른 배치 사이즈 자동 조정"""
     # 매우 보수적인 메모리 기반 조정 (OOM 방지를 위해 더 작게 설정)
@@ -264,7 +286,7 @@ def train_with_sweep():
         f"dataloaders.test_dataloader.batch_size={batch_size}",
     ])
 
-    # 기타 파라미터들
+    # 기타 파라미터들 - config에 직접 설정 (타입 변환 후)
     param_mapping = {
         'models.head.postprocess.thresh': 'models.head.postprocess.thresh',
         'models.head.postprocess.box_thresh': 'models.head.postprocess.box_thresh',
@@ -286,28 +308,40 @@ def train_with_sweep():
 
     for sweep_key, config_key in param_mapping.items():
         if sweep_key in sweep_config:
-            overrides.append(f"{config_key}={sweep_config[sweep_key]}")
+            # 타입 변환 후 config에 직접 설정
+            value = convert_sweep_value(sweep_config[sweep_key])
+            keys = config_key.split('.')
+            current = config
+            for k in keys[:-1]:
+                if k not in current:
+                    current[k] = OmegaConf.create({})
+                current = current[k]
+            current[keys[-1]] = value
 
     # 스케줄러 설정 - 완전한 스케줄러 교체
     scheduler_target = sweep_config.get('models.scheduler._target_')
     if scheduler_target:
+        config.models.scheduler._target_ = scheduler_target
         if scheduler_target == 'torch.optim.lr_scheduler.StepLR':
             # StepLR로 완전 교체
-            overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.StepLR")
-            # T_max 파라미터 명시적 제거
-            overrides.append("~models.scheduler.T_max")
+            # T_max 파라미터 제거
+            if hasattr(config.models.scheduler, 'T_max'):
+                delattr(config.models.scheduler, 'T_max')
+            # StepLR 파라미터 설정
             if 'models.scheduler.step_size' in sweep_config:
-                overrides.append(f"models.scheduler.step_size={sweep_config['models.scheduler.step_size']}")
+                config.models.scheduler.step_size = convert_sweep_value(sweep_config['models.scheduler.step_size'])
             if 'models.scheduler.gamma' in sweep_config:
-                overrides.append(f"models.scheduler.gamma={sweep_config['models.scheduler.gamma']}")
+                config.models.scheduler.gamma = convert_sweep_value(sweep_config['models.scheduler.gamma'])
         elif scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
             # CosineAnnealingLR로 완전 교체 - T_max만 설정
-            overrides.append("models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR")
-            # step_size, gamma 파라미터 명시적 제거
-            overrides.append("~models.scheduler.step_size")
-            overrides.append("~models.scheduler.gamma")
+            # step_size, gamma 파라미터 제거
+            if hasattr(config.models.scheduler, 'step_size'):
+                delattr(config.models.scheduler, 'step_size')
+            if hasattr(config.models.scheduler, 'gamma'):
+                delattr(config.models.scheduler, 'gamma')
+            # T_max 설정
             if 'models.scheduler.T_max' in sweep_config:
-                overrides.append(f"models.scheduler.T_max={sweep_config['models.scheduler.T_max']}")
+                config.models.scheduler.T_max = convert_sweep_value(sweep_config['models.scheduler.T_max'])
 
     # exp_name 설정 (기본값에 timestamp 추가, sweep 중복 방지)
     base_exp_name = getattr(config, 'exp_name', 'ocr_training')
@@ -322,24 +356,8 @@ def train_with_sweep():
         "wandb=True"
     ])
 
-    # Hydra config 업데이트
+    # Hydra config 업데이트 - 나머지 overrides 적용
     from omegaconf import OmegaConf
-
-    # 스케줄러 파라미터 정리 - 사용하지 않는 파라미터 제거
-    scheduler_target = sweep_config.get('models.scheduler._target_')
-    if scheduler_target == 'torch.optim.lr_scheduler.CosineAnnealingLR':
-        # CosineAnnealingLR 사용시 StepLR 파라미터 제거
-        if hasattr(config.models.scheduler, 'step_size'):
-            OmegaConf.set_struct(config.models.scheduler, False)
-            delattr(config.models.scheduler, 'step_size')
-        if hasattr(config.models.scheduler, 'gamma'):
-            OmegaConf.set_struct(config.models.scheduler, False)
-            delattr(config.models.scheduler, 'gamma')
-    elif scheduler_target == 'torch.optim.lr_scheduler.StepLR':
-        # StepLR 사용시 CosineAnnealingLR 파라미터 제거
-        if hasattr(config.models.scheduler, 'T_max'):
-            OmegaConf.set_struct(config.models.scheduler, False)
-            delattr(config.models.scheduler, 'T_max')
 
     for override in overrides:
         # ~ 또는 + 로 시작하는 특수 overrides는 건너뜀 (Hydra가 직접 처리)
@@ -351,23 +369,8 @@ def train_with_sweep():
 
         key, value = override.split('=', 1)
 
-        # 타입 변환 (더 안전한 방식)
-        try:
-            # 이미 올바른 타입이면 그대로 사용
-            if not isinstance(value, str):
-                pass
-            elif value.lower() in ['true', 'false']:
-                value = value.lower() == 'true'
-            elif value.startswith('[') and value.endswith(']'):
-                value = eval(value)
-            elif value.replace('.', '').replace('-', '').isdigit():
-                if '.' in value:
-                    value = float(value)
-                else:
-                    value = int(value)
-        except Exception as e:
-            print(f"Warning: Type conversion failed for {key}={value}: {e}")
-            pass
+        # 타입 변환
+        value = convert_sweep_value(value)
 
         # OmegaConf를 사용한 안전한 설정
         try:
@@ -410,9 +413,9 @@ def train_with_sweep():
 
         model_module, data_module = get_pl_modules_by_cfg(config)
 
-        # 기존 WandB 런이 있다면 종료 (런 재사용 경고 방지)
-        if wandb.run is not None:
-            wandb.finish()
+        # Sweep agent의 run을 재사용하므로 finish() 호출하지 않음
+        # wandb.finish()를 호출하면 sweep agent의 run이 종료되고,
+        # WandbLogger가 새 run을 만들어서 sweep 연결이 끊어짐
 
         # WandB Logger 사용
         from lightning.pytorch.loggers import WandbLogger
