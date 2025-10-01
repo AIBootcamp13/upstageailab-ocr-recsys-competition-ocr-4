@@ -224,3 +224,8 @@ RandomShadow
        test/hmean           0.9696398973464966
      test/precision         0.9690210223197937
        test/recall          0.9715850353240967
+
+PlasmaShadow
+       test/hmean           0.9623655676841736
+     test/precision         0.9629773497581482
+       test/recall          0.9636946320533752
