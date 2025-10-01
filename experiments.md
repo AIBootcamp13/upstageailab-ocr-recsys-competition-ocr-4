@@ -202,3 +202,25 @@ Leaderboard:
 H-Mean	Precision	Recall
 0.9863	0.9868	0.9862
 
+
+기본 모델 1에폭
+Evaluation: 100%|##########| 404/404 [01:41<00:00,  4.00it/s]num=nmci, val/recall=0.781, val/precision=0.922, val/hmean=0.837]
+Evaluation: 100%|##########| 404/404 [01:45<00:00,  3.82it/s]num=nmci, val/recall=0.900, val/precision=0.934, val/hmean=0.913]
+Evaluation: 100%|##########| 404/404 [01:45<00:00,  3.83it/s]num=nmci, val/recall=0.927, val/precision=0.944, val/hmean=0.933]
+Evaluation: 100%|##########| 404/404 [01:48<00:00,  3.73it/s]num=nmci, val/recall=0.920, val/precision=0.954, val/hmean=0.934]
+Evaluation: 100%|##########| 404/404 [01:45<00:00,  3.82it/s]num=nmci, val/recall=0.960, val/precision=0.957, val/hmean=0.957]
+Evaluation: 100%|##########| 404/404 [01:44<00:00,  3.85it/s]num=nmci, val/recall=0.961, val/precision=0.956, val/hmean=0.957]
+Evaluation: 100%|##########| 404/404 [01:46<00:00,  3.81it/s]num=nmci, val/recall=0.963, val/precision=0.962, val/hmean=0.962]
+Evaluation: 100%|##########| 404/404 [01:44<00:00,  3.87it/s]num=nmci, val/recall=0.954, val/precision=0.965, val/hmean=0.958]
+Evaluation: 100%|##########| 404/404 [01:47<00:00,  3.76it/s]num=nmci, val/recall=0.956, val/precision=0.964, val/hmean=0.959]
+Epoch 9: 100%|##########| 205/205 [03:53<00:00,  0.88it/s, v_num=nmci, val/recall=0.969, val/precision=0.969, val/hmean=0.968]
+Using best checkpoint from epoch: 9                                     
+Best checkpoint path: /root/dev/upstageailab-ocr-recsys-competition-ocr-4-fork/outputs/2025-10-01/14-06-52/checkpoints/epoch=9-step=2050.ckpt
+       test/hmean           0.9680269360542297
+     test/precision         0.9691384434700012
+       test/recall          0.9685279130935669
+
+RandomShadow
+       test/hmean           0.9696398973464966
+     test/precision         0.9690210223197937
+       test/recall          0.9715850353240967
