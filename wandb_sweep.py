@@ -52,118 +52,23 @@ HRNET_CHANNELS = {
     'hrnet_w48': [128, 256, 512, 1024],   # 동일한 출력 채널 구조
 }
 
-def get_sweep_config():
-    """WandB sweep configuration"""
-    return {
-        'method': 'bayes',
-        'metric': {
-            'name': 'val/hmean',
-            'goal': 'maximize'
-        },
-        'parameters': {
-            # HRNet 모델 선택
-            'models.encoder.model_name': {
-                'values': ['hrnet_w18', 'hrnet_w32', 'hrnet_w40', 'hrnet_w44', 'hrnet_w48']
-            },
+def load_sweep_config():
+    """sweep_config.yaml 파일에서 설정 로드"""
+    import yaml
 
-            # 이미지 사이즈 파라미터
-            'image_size': {
-                'values': [640, 800, 1024, 1280]
-            },
+    config_path = PROJECT_ROOT / "sweep_config.yaml"
 
-            # 배치 사이즈 (이미지 사이즈와 연동)
-            'batch_size': {
-                'values': [4, 8, 16, 32]
-            },
+    if not config_path.exists():
+        raise FileNotFoundError(
+            f"Sweep config file not found: {config_path}\n"
+            f"Please ensure 'sweep_config.yaml' exists in the project root."
+        )
 
-            # 후처리 파라미터 (experiments.md 베스트 범위)
-            'models.head.postprocess.thresh': {
-                'min': 0.19,
-                'max': 0.25
-            },
-            'models.head.postprocess.box_thresh': {
-                'min': 0.40,
-                'max': 0.49
-            },
-            'models.head.postprocess.box_unclip_ratio': {
-                'min': 1.2,
-                'max': 1.6
-            },
-            'models.head.postprocess.polygon_unclip_ratio': {
-                'min': 1.6,
-                'max': 2.0
-            },
+    with open(config_path, 'r', encoding='utf-8') as f:
+        sweep_config = yaml.safe_load(f)
 
-            # DBLoss 파라미터
-            'models.loss.negative_ratio': {
-                'min': 2.0,
-                'max': 4.0
-            },
-            'models.loss.prob_map_loss_weight': {
-                'min': 3.0,
-                'max': 7.0
-            },
-            'models.loss.thresh_map_loss_weight': {
-                'min': 8.0,
-                'max': 12.0
-            },
-            'models.loss.binary_map_loss_weight': {
-                'min': 0.5,
-                'max': 2.0
-            },
-
-            # DBHead 파라미터
-            'models.head.k': {
-                'values': [40, 45, 50, 55, 60]
-            },
-
-            # 학습 파라미터
-            'models.optimizer._target_': {
-                'values': ['torch.optim.Adam', 'torch.optim.AdamW']
-            },
-            'models.optimizer.lr': {
-                'min': 0.0005,
-                'max': 0.002
-            },
-            'models.optimizer.weight_decay': {
-                'min': 0.00005,
-                'max': 0.0005
-            },
-
-            # 스케줄러
-            'models.scheduler._target_': {
-                'values': ['torch.optim.lr_scheduler.StepLR', 'torch.optim.lr_scheduler.CosineAnnealingLR']
-            },
-            'models.scheduler.step_size': {
-                'values': [50, 75, 100, 125]  # StepLR용
-            },
-            'models.scheduler.gamma': {
-                'values': [0.1, 0.2, 0.5]  # StepLR용
-            },
-            'models.scheduler.T_max': {
-                'values': [8, 10, 12]  # CosineAnnealingLR용
-            },
-
-            # 에포크
-            'trainer.max_epochs': {
-                'values': [8, 10, 12]
-            },
-
-            # CollateFN 파라미터
-            'collate_fn.shrink_ratio': {
-                'min': 0.3,
-                'max': 0.5
-            },
-            'collate_fn.thresh_min': {
-                'min': 0.2,
-                'max': 0.4
-            },
-            'collate_fn.thresh_max': {
-                'min': 0.6,
-                'max': 0.8
-            },
-        }
-    }
+    print(f"Loaded sweep config from: {config_path}")
+    return sweep_config
 
 def convert_sweep_value(value):
     """WandB sweep config 값을 적절한 타입으로 변환"""
@@ -535,7 +440,7 @@ def run_sweep():
     entity = os.environ.get('WANDB_ENTITY', None)
 
     # Sweep 생성
-    sweep_config = get_sweep_config()
+    sweep_config = load_sweep_config()
     sweep_id = wandb.sweep(sweep_config, project=project_name, entity=entity)
 
     print(f"Created sweep: {sweep_id}")
@@ -575,7 +480,7 @@ if __name__ == "__main__":
     else:
         # 기본 동작: sweep config 출력
         import yaml
-        sweep_config = get_sweep_config()
+        sweep_config = load_sweep_config()
         print("Sweep configuration:")
         print(yaml.dump(sweep_config, default_flow_style=False))
         print("\nTo create a sweep:")
