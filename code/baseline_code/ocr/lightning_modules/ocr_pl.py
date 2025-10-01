@@ -80,7 +80,7 @@ class OCRPLModule(pl.LightningModule):
         self.validation_step_outputs.clear()
 
     def test_step(self, batch):
-        pred = self.model(return_loss=False, **batch)
+        pred = self.model(**batch)
 
         boxes_batch, _ = self.model.get_polygons_from_maps(batch, pred)
         for idx, boxes in enumerate(boxes_batch):
