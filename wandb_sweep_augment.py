@@ -117,58 +117,58 @@ def train_with_sweep():
         f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
         "wandb=True",
 
-        # 모델 설정
-        "models.encoder.model_name=hrnet_w44",
-        "models.encoder.select_features=[1,2,3,4]",
-        "models.decoder.in_channels=[128,256,512,1024]",
+        # # 모델 설정
+        # "models.encoder.model_name=hrnet_w44",
+        # "models.encoder.select_features=[1,2,3,4]",
+        # "models.decoder.in_channels=[128,256,512,1024]",
 
-        # 이미지 사이즈 설정 (1024)
-        "transforms.train_transform.transforms.0.max_size=1024",
-        "transforms.train_transform.transforms.1.min_width=1024",
-        "transforms.train_transform.transforms.1.min_height=1024",
-        "transforms.val_transform.transforms.0.max_size=1024",
-        "transforms.val_transform.transforms.1.min_width=1024",
-        "transforms.val_transform.transforms.1.min_height=1024",
-        "transforms.test_transform.transforms.0.max_size=1024",
-        "transforms.test_transform.transforms.1.min_width=1024",
-        "transforms.test_transform.transforms.1.min_height=1024",
+        # # 이미지 사이즈 설정 (1024)
+        # "transforms.train_transform.transforms.0.max_size=1024",
+        # "transforms.train_transform.transforms.1.min_width=1024",
+        # "transforms.train_transform.transforms.1.min_height=1024",
+        # "transforms.val_transform.transforms.0.max_size=1024",
+        # "transforms.val_transform.transforms.1.min_width=1024",
+        # "transforms.val_transform.transforms.1.min_height=1024",
+        # "transforms.test_transform.transforms.0.max_size=1024",
+        # "transforms.test_transform.transforms.1.min_width=1024",
+        # "transforms.test_transform.transforms.1.min_height=1024",
 
-        # 배치 사이즈 (2)
-        "dataloaders.train_dataloader.batch_size=2",
-        "dataloaders.val_dataloader.batch_size=2",
-        "dataloaders.test_dataloader.batch_size=2",
+        # # 배치 사이즈 (2)
+        # "dataloaders.train_dataloader.batch_size=2",
+        # "dataloaders.val_dataloader.batch_size=2",
+        # "dataloaders.test_dataloader.batch_size=2",
 
-        # 후처리 파라미터
-        "models.head.postprocess.thresh=0.23105253214239585",
-        "models.head.postprocess.box_thresh=0.4324259445084524",
-        "models.head.postprocess.box_unclip_ratio=1.4745700672729625",
-        "models.head.postprocess.polygon_unclip_ratio=1.9770744341268096",
+        # # 후처리 파라미터
+        # "models.head.postprocess.thresh=0.23105253214239585",
+        # "models.head.postprocess.box_thresh=0.4324259445084524",
+        # "models.head.postprocess.box_unclip_ratio=1.4745700672729625",
+        # "models.head.postprocess.polygon_unclip_ratio=1.9770744341268096",
 
-        # Loss weights
-        "models.loss.negative_ratio=2.824132345320219",
-        "models.loss.prob_map_loss_weight=3.591196851512631",
-        "models.loss.thresh_map_loss_weight=8.028627860143937",
-        "models.loss.binary_map_loss_weight=0.6919312670387725",
+        # # Loss weights
+        # "models.loss.negative_ratio=2.824132345320219",
+        # "models.loss.prob_map_loss_weight=3.591196851512631",
+        # "models.loss.thresh_map_loss_weight=8.028627860143937",
+        # "models.loss.binary_map_loss_weight=0.6919312670387725",
 
-        # DBHead k
-        "models.head.k=45",
+        # # DBHead k
+        # "models.head.k=45",
 
-        # Optimizer (AdamW)
-        "models.optimizer._target_=torch.optim.AdamW",
-        "models.optimizer.lr=0.0013358832166152786",
-        "models.optimizer.weight_decay=0.0003571900294890783",
+        # # Optimizer (AdamW)
+        # "models.optimizer._target_=torch.optim.AdamW",
+        # "models.optimizer.lr=0.0013358832166152786",
+        # "models.optimizer.weight_decay=0.0003571900294890783",
 
-        # Scheduler (CosineAnnealingLR)
-        "models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR",
-        "models.scheduler.T_max=10",
+        # # Scheduler (CosineAnnealingLR)
+        # "models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR",
+        # "models.scheduler.T_max=10",
 
-        # Epochs
-        "trainer.max_epochs=13",
+        # # Epochs
+        # "trainer.max_epochs=13",
 
-        # CollateFN 파라미터
-        "collate_fn.shrink_ratio=0.428584820771695",
-        "collate_fn.thresh_max=0.7506908133484191",
-        "collate_fn.thresh_min=0.33967147700431666",
+        # # CollateFN 파라미터
+        # "collate_fn.shrink_ratio=0.428584820771695",
+        # "collate_fn.thresh_max=0.7506908133484191",
+        # "collate_fn.thresh_min=0.33967147700431666",
     ]
 
     # ==========================================
@@ -327,21 +327,35 @@ def train_with_sweep():
     # Hydra config 업데이트
     from omegaconf import OmegaConf
 
-    # 스케줄러 파라미터 정리 - CosineAnnealingLR 고정이므로 StepLR 파라미터 제거
-    if hasattr(config.models.scheduler, 'step_size'):
-        OmegaConf.set_struct(config.models.scheduler, False)
-        delattr(config.models.scheduler, 'step_size')
-        print("Removed step_size from scheduler config")
-    if hasattr(config.models.scheduler, 'gamma'):
-        OmegaConf.set_struct(config.models.scheduler, False)
-        delattr(config.models.scheduler, 'gamma')
-        print("Removed gamma from scheduler config")
+    # 스케줄러 파라미터 정리 - 스케줄러 타입에 따라 처리
+    scheduler_target = config.models.scheduler.get('_target_', '')
 
-    # T_max가 없으면 추가 (CosineAnnealingLR 필수 파라미터)
-    if not hasattr(config.models.scheduler, 'T_max'):
-        OmegaConf.set_struct(config.models.scheduler, False)
-        config.models.scheduler.T_max = 10
-        print("Added T_max=10 to scheduler config")
+    if 'CosineAnnealingLR' in scheduler_target:
+        # CosineAnnealingLR인 경우: StepLR 파라미터 제거, T_max 추가
+        if hasattr(config.models.scheduler, 'step_size'):
+            OmegaConf.set_struct(config.models.scheduler, False)
+            delattr(config.models.scheduler, 'step_size')
+            print("Removed step_size from scheduler config (CosineAnnealingLR)")
+        if hasattr(config.models.scheduler, 'gamma'):
+            OmegaConf.set_struct(config.models.scheduler, False)
+            delattr(config.models.scheduler, 'gamma')
+            print("Removed gamma from scheduler config (CosineAnnealingLR)")
+
+        # T_max가 없으면 추가
+        if not hasattr(config.models.scheduler, 'T_max'):
+            OmegaConf.set_struct(config.models.scheduler, False)
+            config.models.scheduler.T_max = 10
+            print("Added T_max=10 to scheduler config (CosineAnnealingLR)")
+
+    elif 'StepLR' in scheduler_target:
+        # StepLR인 경우: T_max 제거 (있다면)
+        if hasattr(config.models.scheduler, 'T_max'):
+            OmegaConf.set_struct(config.models.scheduler, False)
+            delattr(config.models.scheduler, 'T_max')
+            print("Removed T_max from scheduler config (StepLR)")
+    else:
+        # 기타 스케줄러: 로그만 출력
+        print(f"Scheduler type: {scheduler_target} - no parameter adjustment")
 
     for override in overrides:
         # ~ 또는 + 로 시작하는 특수 overrides는 건너뜀 (Hydra가 직접 처리)
@@ -447,43 +461,43 @@ def train_with_sweep():
             data_module,
         )
 
-        # 베스트 체크포인트 로드 및 CSV 제출파일 생성
-        best_checkpoint = checkpoint_callback.best_model_path
-        if best_checkpoint:
-            checkpoint = torch.load(best_checkpoint, map_location='cpu')
-            best_epoch = checkpoint.get("epoch")
-            state_dict = checkpoint.get("state_dict", checkpoint)
-            model_module.load_state_dict(state_dict)
+        # # 베스트 체크포인트 로드 및 CSV 제출파일 생성
+        # best_checkpoint = checkpoint_callback.best_model_path
+        # if best_checkpoint:
+        #     checkpoint = torch.load(best_checkpoint, map_location='cpu')
+        #     best_epoch = checkpoint.get("epoch")
+        #     state_dict = checkpoint.get("state_dict", checkpoint)
+        #     model_module.load_state_dict(state_dict)
 
-            # CSV 생성을 위한 predict 실행
-            trainer.predict(model_module, data_module)
+        #     # CSV 생성을 위한 predict 실행
+        #     trainer.predict(model_module, data_module)
 
-            if getattr(model_module, "last_submission_paths", None):
-                paths = model_module.last_submission_paths
-                print(f"Submission JSON saved to: {paths['json']}")
-                if best_epoch is not None:
-                    print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
-                else:
-                    print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
+        #     if getattr(model_module, "last_submission_paths", None):
+        #         paths = model_module.last_submission_paths
+        #         print(f"Submission JSON saved to: {paths['json']}")
+        #         if best_epoch is not None:
+        #             print(f"Submission CSV saved to: {paths['csv']} (best epoch: {best_epoch})")
+        #         else:
+        #             print(f"Submission CSV saved to: {paths['csv']} (best epoch metadata unavailable)")
 
-                # CSV 파일을 WandB artifact로 업로드
-                try:
-                    csv_path = paths['csv']
-                    if os.path.exists(csv_path):
-                        artifact = wandb.Artifact(
-                            name=f"submission_csv_{wandb.run.id}",
-                            type="submission",
-                            description=f"CSV submission file from epoch {best_epoch if best_epoch is not None else 'unknown'}"
-                        )
-                        artifact.add_file(csv_path, name="submission.csv")
-                        wandb.log_artifact(artifact)
-                        print(f"Submission CSV uploaded as WandB artifact: submission_csv_{wandb.run.id}")
-                    else:
-                        print(f"CSV file not found at: {csv_path}")
-                except Exception as e:
-                    print(f"Failed to upload CSV as artifact: {e}")
-        else:
-            print("Model checkpoint was not created; skipping submission generation.")
+        #         # CSV 파일을 WandB artifact로 업로드
+        #         try:
+        #             csv_path = paths['csv']
+        #             if os.path.exists(csv_path):
+        #                 artifact = wandb.Artifact(
+        #                     name=f"submission_csv_{wandb.run.id}",
+        #                     type="submission",
+        #                     description=f"CSV submission file from epoch {best_epoch if best_epoch is not None else 'unknown'}"
+        #                 )
+        #                 artifact.add_file(csv_path, name="submission.csv")
+        #                 wandb.log_artifact(artifact)
+        #                 print(f"Submission CSV uploaded as WandB artifact: submission_csv_{wandb.run.id}")
+        #             else:
+        #                 print(f"CSV file not found at: {csv_path}")
+        #         except Exception as e:
+        #             print(f"Failed to upload CSV as artifact: {e}")
+        # else:
+        #     print("Model checkpoint was not created; skipping submission generation.")
 
         # 최종 메트릭 로깅
         if hasattr(model_module, 'test_metrics'):
