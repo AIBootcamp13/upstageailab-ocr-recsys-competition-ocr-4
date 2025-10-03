@@ -172,153 +172,262 @@ def train_with_sweep():
     ]
 
     # ==========================================
-    # 13개 Augmentation 파라미터 sweep
+    # 활성화된 Augmentation 파라미터만 sweep
     # ==========================================
 
-    # 1. RandomBrightnessContrast (transforms[3])
+    train_transforms = config.transforms.train_transform.transforms
+    transform_index_map = {}
+    for idx, transform in enumerate(train_transforms):
+        target_name = transform.get('_target_') if hasattr(transform, 'get') else None
+        if target_name:
+            transform_index_map[target_name] = idx
+
+    def apply_transform_params(target_name: str, params: dict, label: str):
+        idx = transform_index_map.get(target_name)
+        if idx is None:
+            print(f"Skipping augmentation override for {label} ({target_name}) - transform not found in base config")
+            return False
+
+        transform_cfg = train_transforms[idx]
+        OmegaConf.set_struct(transform_cfg, False)
+        for key, value in params.items():
+            transform_cfg[key] = value
+        return True
+
+    applied_logs = []
+
+    # 1. RandomBrightnessContrast
     brightness_limit = sweep_config.get('brightness_limit', 0.2)
     contrast_limit = sweep_config.get('contrast_limit', 0.2)
     brightness_contrast_p = sweep_config.get('brightness_contrast_p', 0.3)
-    overrides.extend([
-        f"transforms.train_transform.transforms.3.brightness_limit={brightness_limit}",
-        f"transforms.train_transform.transforms.3.contrast_limit={contrast_limit}",
-        f"transforms.train_transform.transforms.3.p={brightness_contrast_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.RandomBrightnessContrast',
+        {
+            'brightness_limit': brightness_limit,
+            'contrast_limit': contrast_limit,
+            'p': brightness_contrast_p,
+        },
+        'RandomBrightnessContrast',
+    ):
+        applied_logs.append(
+            f"RandomBrightnessContrast: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}"
+        )
 
-    # 2. ColorJitter (transforms[4])
+    # 2. ColorJitter
     color_jitter_brightness = sweep_config.get('color_jitter_brightness', 0.2)
     color_jitter_contrast = sweep_config.get('color_jitter_contrast', 0.2)
     color_jitter_saturation = sweep_config.get('color_jitter_saturation', 0.2)
     color_jitter_hue = sweep_config.get('color_jitter_hue', 0.1)
     color_jitter_p = sweep_config.get('color_jitter_p', 0.3)
-    overrides.extend([
-        f"transforms.train_transform.transforms.4.brightness={color_jitter_brightness}",
-        f"transforms.train_transform.transforms.4.contrast={color_jitter_contrast}",
-        f"transforms.train_transform.transforms.4.saturation={color_jitter_saturation}",
-        f"transforms.train_transform.transforms.4.hue={color_jitter_hue}",
-        f"transforms.train_transform.transforms.4.p={color_jitter_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.ColorJitter',
+        {
+            'brightness': color_jitter_brightness,
+            'contrast': color_jitter_contrast,
+            'saturation': color_jitter_saturation,
+            'hue': color_jitter_hue,
+            'p': color_jitter_p,
+        },
+        'ColorJitter',
+    ):
+        applied_logs.append(
+            f"ColorJitter: brightness={color_jitter_brightness}, contrast={color_jitter_contrast}, saturation={color_jitter_saturation}, hue={color_jitter_hue}, p={color_jitter_p}"
+        )
 
-    # 3. RandomGamma (transforms[5])
+    # 3. RandomGamma
     gamma_limit_lower = int(sweep_config.get('gamma_limit_lower', 80))
     gamma_limit_upper = int(sweep_config.get('gamma_limit_upper', 120))
     random_gamma_p = sweep_config.get('random_gamma_p', 0.3)
-    overrides.extend([
-        f"transforms.train_transform.transforms.5.gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}]",
-        f"transforms.train_transform.transforms.5.p={random_gamma_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.RandomGamma',
+        {
+            'gamma_limit': [gamma_limit_lower, gamma_limit_upper],
+            'p': random_gamma_p,
+        },
+        'RandomGamma',
+    ):
+        applied_logs.append(
+            f"RandomGamma: gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}], p={random_gamma_p}"
+        )
 
-    # 4. HueSaturationValue (transforms[6])
+    # 4. HueSaturationValue
     hue_shift_limit = int(sweep_config.get('hue_shift_limit', 20))
     sat_shift_limit = int(sweep_config.get('sat_shift_limit', 30))
     val_shift_limit = int(sweep_config.get('val_shift_limit', 20))
     hsv_p = sweep_config.get('hsv_p', 0.3)
-    overrides.extend([
-        f"transforms.train_transform.transforms.6.hue_shift_limit={hue_shift_limit}",
-        f"transforms.train_transform.transforms.6.sat_shift_limit={sat_shift_limit}",
-        f"transforms.train_transform.transforms.6.val_shift_limit={val_shift_limit}",
-        f"transforms.train_transform.transforms.6.p={hsv_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.HueSaturationValue',
+        {
+            'hue_shift_limit': hue_shift_limit,
+            'sat_shift_limit': sat_shift_limit,
+            'val_shift_limit': val_shift_limit,
+            'p': hsv_p,
+        },
+        'HueSaturationValue',
+    ):
+        applied_logs.append(
+            f"HueSaturationValue: hue_shift_limit={hue_shift_limit}, sat_shift_limit={sat_shift_limit}, val_shift_limit={val_shift_limit}, p={hsv_p}"
+        )
 
-    # 5. GaussianBlur (transforms[7])
+    # 5. GaussianBlur
     gaussian_blur_limit = int(sweep_config.get('gaussian_blur_limit', 5))
-    # blur_limit은 홀수여야 하므로 조정
     if gaussian_blur_limit % 2 == 0:
         gaussian_blur_limit += 1
     gaussian_blur_p = sweep_config.get('gaussian_blur_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.7.blur_limit=[3,{gaussian_blur_limit}]",
-        f"transforms.train_transform.transforms.7.p={gaussian_blur_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.GaussianBlur',
+        {
+            'blur_limit': [3, gaussian_blur_limit],
+            'p': gaussian_blur_p,
+        },
+        'GaussianBlur',
+    ):
+        applied_logs.append(
+            f"GaussianBlur: blur_limit=[3,{gaussian_blur_limit}], p={gaussian_blur_p}"
+        )
 
-    # 6. MotionBlur (transforms[8])
+    # 6. MotionBlur
     motion_blur_limit = int(sweep_config.get('motion_blur_limit', 5))
     if motion_blur_limit % 2 == 0:
         motion_blur_limit += 1
     motion_blur_p = sweep_config.get('motion_blur_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.8.blur_limit=[3,{motion_blur_limit}]",
-        f"transforms.train_transform.transforms.8.p={motion_blur_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.MotionBlur',
+        {
+            'blur_limit': [3, motion_blur_limit],
+            'p': motion_blur_p,
+        },
+        'MotionBlur',
+    ):
+        applied_logs.append(
+            f"MotionBlur: blur_limit=[3,{motion_blur_limit}], p={motion_blur_p}"
+        )
 
-    # 7. GaussNoise (transforms[9])
+    # 7. GaussNoise
     gauss_noise_std_lower = sweep_config.get('gauss_noise_std_lower', 0.02)
     gauss_noise_std_upper = sweep_config.get('gauss_noise_std_upper', 0.08)
     gauss_noise_p = sweep_config.get('gauss_noise_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.9.std_range=[{gauss_noise_std_lower},{gauss_noise_std_upper}]",
-        f"transforms.train_transform.transforms.9.p={gauss_noise_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.GaussNoise',
+        {
+            'std_range': [gauss_noise_std_lower, gauss_noise_std_upper],
+            'p': gauss_noise_p,
+        },
+        'GaussNoise',
+    ):
+        applied_logs.append(
+            f"GaussNoise: std_range=[{gauss_noise_std_lower},{gauss_noise_std_upper}], p={gauss_noise_p}"
+        )
 
-    # 8. ImageCompression (transforms[10])
+    # 8. ImageCompression
     compression_quality_lower = int(sweep_config.get('compression_quality_lower', 75))
     compression_quality_upper = int(sweep_config.get('compression_quality_upper', 100))
     image_compression_p = sweep_config.get('image_compression_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.10.quality_range=[{compression_quality_lower},{compression_quality_upper}]",
-        f"transforms.train_transform.transforms.10.p={image_compression_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.ImageCompression',
+        {
+            'quality_range': [compression_quality_lower, compression_quality_upper],
+            'p': image_compression_p,
+        },
+        'ImageCompression',
+    ):
+        applied_logs.append(
+            f"ImageCompression: quality_range=[{compression_quality_lower},{compression_quality_upper}], p={image_compression_p}"
+        )
 
-    # 9. Sharpen (transforms[11])
+    # 9. Sharpen
     sharpen_alpha_lower = sweep_config.get('sharpen_alpha_lower', 0.2)
     sharpen_alpha_upper = sweep_config.get('sharpen_alpha_upper', 0.5)
     sharpen_lightness_lower = sweep_config.get('sharpen_lightness_lower', 0.5)
     sharpen_lightness_upper = sweep_config.get('sharpen_lightness_upper', 1.0)
     sharpen_p = sweep_config.get('sharpen_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.11.alpha=[{sharpen_alpha_lower},{sharpen_alpha_upper}]",
-        f"transforms.train_transform.transforms.11.lightness=[{sharpen_lightness_lower},{sharpen_lightness_upper}]",
-        f"transforms.train_transform.transforms.11.p={sharpen_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.Sharpen',
+        {
+            'alpha': [sharpen_alpha_lower, sharpen_alpha_upper],
+            'lightness': [sharpen_lightness_lower, sharpen_lightness_upper],
+            'p': sharpen_p,
+        },
+        'Sharpen',
+    ):
+        applied_logs.append(
+            f"Sharpen: alpha=[{sharpen_alpha_lower},{sharpen_alpha_upper}], lightness=[{sharpen_lightness_lower},{sharpen_lightness_upper}], p={sharpen_p}"
+        )
 
-    # 10. Downscale (transforms[12])
+    # 10. Downscale
     downscale_lower = sweep_config.get('downscale_lower', 0.75)
     downscale_upper = sweep_config.get('downscale_upper', 0.95)
     downscale_p = sweep_config.get('downscale_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.12.scale_range=[{downscale_lower},{downscale_upper}]",
-        f"transforms.train_transform.transforms.12.p={downscale_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.Downscale',
+        {
+            'scale_range': [downscale_lower, downscale_upper],
+            'p': downscale_p,
+        },
+        'Downscale',
+    ):
+        applied_logs.append(
+            f"Downscale: scale_range=[{downscale_lower},{downscale_upper}], p={downscale_p}"
+        )
 
-    # 11. RandomShadow (transforms[13])
+    # 11. RandomShadow
     shadow_num_lower = int(sweep_config.get('shadow_num_lower', 1))
     shadow_num_upper = int(sweep_config.get('shadow_num_upper', 2))
     shadow_dimension = int(sweep_config.get('shadow_dimension', 5))
     random_shadow_p = sweep_config.get('random_shadow_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.13.num_shadows_limit=[{shadow_num_lower},{shadow_num_upper}]",
-        f"transforms.train_transform.transforms.13.shadow_dimension={shadow_dimension}",
-        f"transforms.train_transform.transforms.13.p={random_shadow_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.RandomShadow',
+        {
+            'num_shadows_limit': [shadow_num_lower, shadow_num_upper],
+            'shadow_dimension': shadow_dimension,
+            'p': random_shadow_p,
+        },
+        'RandomShadow',
+    ):
+        applied_logs.append(
+            f"RandomShadow: num_shadows_limit=[{shadow_num_lower},{shadow_num_upper}], shadow_dimension={shadow_dimension}, p={random_shadow_p}"
+        )
 
-    # 12. PlasmaShadow (transforms[14])
+    # 12. PlasmaShadow
     plasma_shadow_intensity_lower = sweep_config.get('plasma_shadow_intensity_lower', 0.3)
     plasma_shadow_intensity_upper = sweep_config.get('plasma_shadow_intensity_upper', 0.7)
     plasma_roughness = sweep_config.get('plasma_roughness', 3.0)
     plasma_shadow_p = sweep_config.get('plasma_shadow_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.14.shadow_intensity_range=[{plasma_shadow_intensity_lower},{plasma_shadow_intensity_upper}]",
-        f"transforms.train_transform.transforms.14.roughness={plasma_roughness}",
-        f"transforms.train_transform.transforms.14.p={plasma_shadow_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.PlasmaShadow',
+        {
+            'shadow_intensity_range': [plasma_shadow_intensity_lower, plasma_shadow_intensity_upper],
+            'roughness': plasma_roughness,
+            'p': plasma_shadow_p,
+        },
+        'PlasmaShadow',
+    ):
+        applied_logs.append(
+            f"PlasmaShadow: shadow_intensity_range=[{plasma_shadow_intensity_lower},{plasma_shadow_intensity_upper}], roughness={plasma_roughness}, p={plasma_shadow_p}"
+        )
 
-    # 13. RandomFog (transforms[15])
+    # 13. RandomFog
     fog_coef_lower = sweep_config.get('fog_coef_lower', 0.1)
     fog_coef_upper = sweep_config.get('fog_coef_upper', 0.3)
     fog_alpha_coef = sweep_config.get('fog_alpha_coef', 0.08)
     random_fog_p = sweep_config.get('random_fog_p', 0.2)
-    overrides.extend([
-        f"transforms.train_transform.transforms.15.fog_coef_range=[{fog_coef_lower},{fog_coef_upper}]",
-        f"transforms.train_transform.transforms.15.alpha_coef={fog_alpha_coef}",
-        f"transforms.train_transform.transforms.15.p={random_fog_p}",
-    ])
+    if apply_transform_params(
+        'albumentations.RandomFog',
+        {
+            'fog_coef_range': [fog_coef_lower, fog_coef_upper],
+            'alpha_coef': fog_alpha_coef,
+            'p': random_fog_p,
+        },
+        'RandomFog',
+    ):
+        applied_logs.append(
+            f"RandomFog: fog_coef_range=[{fog_coef_lower},{fog_coef_upper}], alpha_coef={fog_alpha_coef}, p={random_fog_p}"
+        )
 
-    print(f"Augmentation params configured:")
-    print(f"  RandomBrightnessContrast: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}")
-    print(f"  ColorJitter: brightness={color_jitter_brightness}, contrast={color_jitter_contrast}, p={color_jitter_p}")
-    print(f"  RandomGamma: gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}], p={random_gamma_p}")
-    print(f"  GaussianBlur: blur_limit={gaussian_blur_limit}, p={gaussian_blur_p}")
-    print(f"  MotionBlur: blur_limit={motion_blur_limit}, p={motion_blur_p}")
+    if applied_logs:
+        print("Augmentation params configured:")
+        for log_line in applied_logs:
+            print(f"  {log_line}")
 
     # exp_name 설정
     sweep_exp_name = f"augment_sweep_{wandb.run.name}"
