@@ -114,7 +114,7 @@ def train_with_sweep():
     # ==========================================
     overrides = [
         "preset=example",
-        f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
+        # f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
         "wandb=True",
 
         # # 모델 설정
