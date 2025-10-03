@@ -3,7 +3,7 @@
 
 method: bayes  # bayes, grid, random
 metric:
-  name: val/hmean
+  name: test/hmean
   goal: maximize
 
 parameters:
