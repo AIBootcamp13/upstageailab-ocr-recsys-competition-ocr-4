@@ -100,22 +100,22 @@ parameters:
   #   min: 0.0
   #   max: 0.4
 
-  # 9. Sharpen (train_transform.transforms[11])
-  sharpen_alpha_lower:
-    min: 0.1
-    max: 0.3
-  sharpen_alpha_upper:
-    min: 0.4
-    max: 0.7
-  sharpen_lightness_lower:
-    min: 0.3
-    max: 0.6
-  sharpen_lightness_upper:
-    min: 0.8
-    max: 1.2
-  sharpen_p:
-    min: 0.0
-    max: 0.4
+  # # 9. Sharpen (train_transform.transforms[11])
+  # sharpen_alpha_lower:
+  #   min: 0.1
+  #   max: 0.3
+  # sharpen_alpha_upper:
+  #   min: 0.4
+  #   max: 0.7
+  # sharpen_lightness_lower:
+  #   min: 0.3
+  #   max: 0.6
+  # sharpen_lightness_upper:
+  #   min: 0.8
+  #   max: 1.2
+  # sharpen_p:
+  #   min: 0.0
+  #   max: 0.4
 
   # # 10. Downscale (train_transform.transforms[12])
   # # scale_range: 다운스케일 비율 (0.5 = 50% 크기로 축소 후 다시 확대)

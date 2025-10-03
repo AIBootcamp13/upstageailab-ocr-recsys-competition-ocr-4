@@ -72,10 +72,10 @@ transforms:
       # - _target_: albumentations.ImageCompression
       #   quality_range: [75, 100]
       #   p: 0.2
-      - _target_: albumentations.Sharpen
-        alpha: [0.2, 0.5]
-        lightness: [0.5, 1.0]
-        p: 0.2
+      # - _target_: albumentations.Sharpen
+      #   alpha: [0.2, 0.5]
+      #   lightness: [0.5, 1.0]
+      #   p: 0.2
       # - _target_: albumentations.Downscale
       #   scale_range: [0.75, 0.95]
       #   p: 0.2
