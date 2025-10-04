@@ -19,21 +19,21 @@ parameters:
     max: 0.5
 
   # 2. ColorJitter (train_transform.transforms[4])
-  color_jitter_brightness:
-    min: 0.0
-    max: 0.3
-  color_jitter_contrast:
-    min: 0.0
-    max: 0.3
-  color_jitter_saturation:
-    min: 0.0
-    max: 0.3
-  color_jitter_hue:
-    min: 0.0
-    max: 0.15
-  color_jitter_p:
-    min: 0.0
-    max: 0.5
+  # color_jitter_brightness:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_contrast:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_saturation:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_hue:
+  #   min: 0.0
+  #   max: 0.15
+  # color_jitter_p:
+  #   min: 0.0
+  #   max: 0.5
 
   # 3. RandomGamma (train_transform.transforms[5])
   gamma_limit_lower:
@@ -131,18 +131,18 @@ parameters:
 
   # 11. RandomShadow (train_transform.transforms[13])
   # num_shadows_limit: 그림자 개수 범위
-  shadow_num_lower:
-    min: 1
-    max: 2
-  shadow_num_upper:
-    min: 2
-    max: 4
-  shadow_dimension:
-    min: 3
-    max: 7
-  random_shadow_p:
-    min: 0.0
-    max: 0.4
+  # shadow_num_lower:
+  #   min: 1
+  #   max: 2
+  # shadow_num_upper:
+  #   min: 2
+  #   max: 4
+  # shadow_dimension:
+  #   min: 3
+  #   max: 7
+  # random_shadow_p:
+  #   min: 0.0
+  #   max: 0.4
 
   # # 12. PlasmaShadow (train_transform.transforms[14])
   # plasma_shadow_intensity_lower:

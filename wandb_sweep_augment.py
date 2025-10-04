@@ -214,25 +214,25 @@ def train_with_sweep():
         )
 
     # 2. ColorJitter
-    color_jitter_brightness = sweep_config.get('color_jitter_brightness', 0.2)
-    color_jitter_contrast = sweep_config.get('color_jitter_contrast', 0.2)
-    color_jitter_saturation = sweep_config.get('color_jitter_saturation', 0.2)
-    color_jitter_hue = sweep_config.get('color_jitter_hue', 0.1)
-    color_jitter_p = sweep_config.get('color_jitter_p', 0.3)
-    if apply_transform_params(
-        'albumentations.ColorJitter',
-        {
-            'brightness': color_jitter_brightness,
-            'contrast': color_jitter_contrast,
-            'saturation': color_jitter_saturation,
-            'hue': color_jitter_hue,
-            'p': color_jitter_p,
-        },
-        'ColorJitter',
-    ):
-        applied_logs.append(
-            f"ColorJitter: brightness={color_jitter_brightness}, contrast={color_jitter_contrast}, saturation={color_jitter_saturation}, hue={color_jitter_hue}, p={color_jitter_p}"
-        )
+    # color_jitter_brightness = sweep_config.get('color_jitter_brightness', 0.2)
+    # color_jitter_contrast = sweep_config.get('color_jitter_contrast', 0.2)
+    # color_jitter_saturation = sweep_config.get('color_jitter_saturation', 0.2)
+    # color_jitter_hue = sweep_config.get('color_jitter_hue', 0.1)
+    # color_jitter_p = sweep_config.get('color_jitter_p', 0.3)
+    # if apply_transform_params(
+    #     'albumentations.ColorJitter',
+    #     {
+    #         'brightness': color_jitter_brightness,
+    #         'contrast': color_jitter_contrast,
+    #         'saturation': color_jitter_saturation,
+    #         'hue': color_jitter_hue,
+    #         'p': color_jitter_p,
+    #     },
+    #     'ColorJitter',
+    # ):
+    #     applied_logs.append(
+    #         f"ColorJitter: brightness={color_jitter_brightness}, contrast={color_jitter_contrast}, saturation={color_jitter_saturation}, hue={color_jitter_hue}, p={color_jitter_p}"
+    #     )
 
     # 3. RandomGamma
     gamma_limit_lower = int(sweep_config.get('gamma_limit_lower', 80))
@@ -371,22 +371,22 @@ def train_with_sweep():
         )
 
     # 11. RandomShadow
-    shadow_num_lower = int(sweep_config.get('shadow_num_lower', 1))
-    shadow_num_upper = int(sweep_config.get('shadow_num_upper', 2))
-    shadow_dimension = int(sweep_config.get('shadow_dimension', 5))
-    random_shadow_p = sweep_config.get('random_shadow_p', 0.2)
-    if apply_transform_params(
-        'albumentations.RandomShadow',
-        {
-            'num_shadows_limit': [shadow_num_lower, shadow_num_upper],
-            'shadow_dimension': shadow_dimension,
-            'p': random_shadow_p,
-        },
-        'RandomShadow',
-    ):
-        applied_logs.append(
-            f"RandomShadow: num_shadows_limit=[{shadow_num_lower},{shadow_num_upper}], shadow_dimension={shadow_dimension}, p={random_shadow_p}"
-        )
+    # shadow_num_lower = int(sweep_config.get('shadow_num_lower', 1))
+    # shadow_num_upper = int(sweep_config.get('shadow_num_upper', 2))
+    # shadow_dimension = int(sweep_config.get('shadow_dimension', 5))
+    # random_shadow_p = sweep_config.get('random_shadow_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.RandomShadow',
+    #     {
+    #         'num_shadows_limit': [shadow_num_lower, shadow_num_upper],
+    #         'shadow_dimension': shadow_dimension,
+    #         'p': random_shadow_p,
+    #     },
+    #     'RandomShadow',
+    # ):
+    #     applied_logs.append(
+    #         f"RandomShadow: num_shadows_limit=[{shadow_num_lower},{shadow_num_upper}], shadow_dimension={shadow_dimension}, p={random_shadow_p}"
+    #     )
 
     # 12. PlasmaShadow
     plasma_shadow_intensity_lower = sweep_config.get('plasma_shadow_intensity_lower', 0.3)
