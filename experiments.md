@@ -202,7 +202,31 @@ Leaderboard:
 H-Mean	Precision	Recall
 0.9863	0.9868	0.9862
 
+rbc_b32_c28_p40
+Leaderboard:
+0.9870 / 0.9869 / 0.9874
 
+best 증강 sweep
+brightness_contrast_p:0.17099417286429375
+brightness_limit:0.34146436314408957
+color_jitter_brightness:0.1482166002922425
+color_jitter_contrast:0.1380738907923448
+color_jitter_hue:0.093762861716502
+color_jitter_p:0.024452081273023007
+color_jitter_saturation:0.03303697914933371
+contrast_limit:0.19927640404389452
+gamma_limit_lower:82
+gamma_limit_upper:128
+gaussian_blur_limit:5
+gaussian_blur_p:0.1896680736951049
+random_gamma_p:0.122251369866415
+random_shadow_p:0.0558550781178635
+shadow_dimension:6
+shadow_num_lower:2
+shadow_num_upper:4
+
+
+-------------------
 기본 모델 1에폭
 Evaluation: 100%|##########| 404/404 [01:41<00:00,  4.00it/s]num=nmci, val/recall=0.781, val/precision=0.922, val/hmean=0.837]
 Evaluation: 100%|##########| 404/404 [01:45<00:00,  3.82it/s]num=nmci, val/recall=0.900, val/precision=0.934, val/hmean=0.913]
