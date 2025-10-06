@@ -1,6 +1,8 @@
 import os
 import sys
 import warnings
+import shutil
+import re
 from pathlib import Path
 
 warnings.filterwarnings(
@@ -55,7 +57,8 @@ def train(config):
     callbacks = [
         LearningRateMonitor(logging_interval='step'),
         ModelCheckpoint(dirpath=checkpoint_path,
-                        save_top_k=3, monitor='val/loss', mode='min'),
+                        filename='{epoch}-{val/hmean:.3f}',
+                        save_top_k=3, monitor='val/hmean', mode='max'),
     ]
 
     trainer = pl.Trainer(
@@ -73,6 +76,19 @@ def train(config):
         model_module,
         data_module,
     )
+
+    # Copy best checkpoint to best folder
+    best_dir = Path(checkpoint_path) / "best"
+    best_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints = list(Path(checkpoint_path).rglob("*.ckpt"))
+    if checkpoints:
+        def extract_hmean(path):
+            match = re.search(r'-([0-9]+\.\d+)', path.name)
+            if match:
+                return float(match.group(1))
+            return float('-inf')
+        best_ckpt = max(checkpoints, key=extract_hmean)
+        shutil.copy(best_ckpt, best_dir / "model.ckpt")
 
 
 if __name__ == "__main__":

@@ -9,3 +9,5 @@ exp_name: "ocr_training"
 
 checkpoint_path: null
 minified_json: False
+
+submission_dir: "outputs/${exp_name}/submissions"
