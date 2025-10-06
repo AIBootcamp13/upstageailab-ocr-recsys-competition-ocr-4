@@ -74,7 +74,7 @@ def main():
     if start_step <= 1:
         print("1단계: 모델 학습 중...")
         train_cmd = ["uv", "run", "python", "code/baseline_code/runners/train.py", f"preset={preset}", f"exp_name={exp_name}"]
-        subprocess.run(train_cmd, check=True)
+        subprocess.run(train_cmd, check=True, env=dict(os.environ, HYDRA_FULL_ERROR='1'))
     else:
         print("1단계: 모델 학습 생략 (resume 모드)")
 
