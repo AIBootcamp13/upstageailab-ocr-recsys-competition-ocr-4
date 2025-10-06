@@ -1,4 +1,5 @@
 data/datasets
+data/datasets_jpg
 data/data.tar.gz
 .venv/
 __pycache__

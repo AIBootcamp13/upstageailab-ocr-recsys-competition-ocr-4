@@ -10,8 +10,8 @@ defaults:
 models:
   optimizer:
     _target_: torch.optim.Adam
-    lr: 0.001
-    weight_decay: 0.0001
+    lr: 0.00017187 # default 0.001
+    weight_decay: 0.000438 # default 0.0001
   scheduler:
     _target_: torch.optim.lr_scheduler.StepLR
     step_size: 100

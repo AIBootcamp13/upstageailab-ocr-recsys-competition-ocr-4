@@ -5,8 +5,8 @@
 models:
   loss:
     _target_: ${loss_path}.DBPP_Loss
-    alpha: 1.0
-    beta: 10.0
+    alpha: 1.456 #sweet best
+    beta: 12.794 #sweet best
     gamma: 1.0
-    negative_ratio: 3.0
+    negative_ratio: 3.945 #sweet best
     eps: 1e-6
