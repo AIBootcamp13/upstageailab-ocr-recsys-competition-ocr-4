@@ -159,6 +159,36 @@ def train_with_sweep():
                 transforms_list[1].min_width = image_size
                 transforms_list[1].min_height = image_size
 
+            # RandomBrightnessContrast 파라미터 오버라이드
+            rbc_param_mapping = {
+                'brightness_limit': 'brightness_limit',
+                'contrast_limit': 'contrast_limit',
+                'brightness_contrast_p': 'p',
+            }
+            rbc_overrides = {}
+            for sweep_key, transform_key in rbc_param_mapping.items():
+                if sweep_key in sweep_config:
+                    rbc_overrides[transform_key] = convert_sweep_value(sweep_config[sweep_key])
+
+            if rbc_overrides:
+                rbc_transform = None
+                for transform_cfg in transforms_list:
+                    target = transform_cfg.get('_target_') if hasattr(transform_cfg, 'get') else getattr(transform_cfg, '_target_', None)
+                    if target == 'albumentations.RandomBrightnessContrast':
+                        rbc_transform = transform_cfg
+                        break
+
+                if rbc_transform is not None:
+                    OmegaConf.set_struct(rbc_transform, False)
+                    for key, value in rbc_overrides.items():
+                        rbc_transform[key] = value
+                    print(
+                        "RandomBrightnessContrast overrides applied:",
+                        {k: rbc_transform[k] for k in rbc_overrides.keys()}
+                    )
+                else:
+                    print("RandomBrightnessContrast transform not found; skipping overrides.")
+
         # val_transform
         if 'transforms' in config and 'val_transform' in config.transforms:
             transforms_list = config.transforms.val_transform.transforms

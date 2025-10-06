@@ -17,6 +17,20 @@ parameters:
       - hrnet_w48    # 최상위 모델
       - hrnet_w64    # 최상위 모델
 
+  # === 데이터 증강 파라미터 ===
+
+  brightness_limit:
+    min: 0.1
+    max: 0.4
+
+  contrast_limit:
+    min: 0.1
+    max: 0.4
+
+  brightness_contrast_p:
+    min: 0.0
+    max: 0.5
+
   # 이미지 사이즈 (experiments.md에서 800이 좋은 성능)
   image_size:
     values: [640, 800, 1024, 1280]
