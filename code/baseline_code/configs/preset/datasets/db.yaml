@@ -40,18 +40,18 @@ transforms:
         p: 0.5
       # 색상/밝기 조정 증강
       - _target_: albumentations.RandomBrightnessContrast
-        brightness_limit: 0.2
-        contrast_limit: 0.2
-        p: 0.3
-      # - _target_: albumentations.ColorJitter
-      #   brightness: 0.2
-      #   contrast: 0.2
-      #   saturation: 0.2
-      #   hue: 0.1
-      #   p: 0.3
+        brightness_limit: 0.34146436314408957
+        contrast_limit: 0.19927640404389452
+        p: 0.17099417286429375
+      - _target_: albumentations.ColorJitter
+        brightness: 0.1482166002922425
+        contrast: 0.1380738907923448
+        saturation: 0.03303697914933371
+        hue: 0.093762861716502
+        p: 0.024452081273023007
       - _target_: albumentations.RandomGamma
-        gamma_limit: [80, 120]
-        p: 0.3
+        gamma_limit: [82, 128]
+        p: 0.122251369866415
       # - _target_: albumentations.HueSaturationValue
       #   hue_shift_limit: 20
       #   sat_shift_limit: 30
@@ -59,8 +59,8 @@ transforms:
       #   p: 0.3
       # 블러/노이즈 증강
       - _target_: albumentations.GaussianBlur
-        blur_limit: [3, 7]
-        p: 0.2
+        blur_limit: 5
+        p: 0.1896680736951049
       # - _target_: albumentations.MotionBlur
       #   blur_limit: [3, 7]
       #   p: 0.2
@@ -80,11 +80,11 @@ transforms:
       #   scale_range: [0.75, 0.95]
       #   p: 0.2
       # 날씨/조명 효과 증강
-      # - _target_: albumentations.RandomShadow
-      #   shadow_roi: [0, 0.5, 1, 1]
-      #   num_shadows_limit: [1, 2]
-      #   shadow_dimension: 5
-      #   p: 0.2
+      - _target_: albumentations.RandomShadow
+        shadow_roi: [0, 0.5, 1, 1]
+        num_shadows_limit: [2, 4]
+        shadow_dimension: 6
+        p: 0.0558550781178635
       # - _target_: albumentations.PlasmaShadow
       #   shadow_intensity_range: [0.3, 0.7]
       #   roughness: 3.0
