@@ -43,12 +43,12 @@ transforms:
         brightness_limit: 0.2
         contrast_limit: 0.2
         p: 0.3
-      - _target_: albumentations.ColorJitter
-        brightness: 0.2
-        contrast: 0.2
-        saturation: 0.2
-        hue: 0.1
-        p: 0.3
+      # - _target_: albumentations.ColorJitter
+      #   brightness: 0.2
+      #   contrast: 0.2
+      #   saturation: 0.2
+      #   hue: 0.1
+      #   p: 0.3
       - _target_: albumentations.RandomGamma
         gamma_limit: [80, 120]
         p: 0.3
@@ -80,11 +80,11 @@ transforms:
       #   scale_range: [0.75, 0.95]
       #   p: 0.2
       # 날씨/조명 효과 증강
-      - _target_: albumentations.RandomShadow
-        shadow_roi: [0, 0.5, 1, 1]
-        num_shadows_limit: [1, 2]
-        shadow_dimension: 5
-        p: 0.2
+      # - _target_: albumentations.RandomShadow
+      #   shadow_roi: [0, 0.5, 1, 1]
+      #   num_shadows_limit: [1, 2]
+      #   shadow_dimension: 5
+      #   p: 0.2
       # - _target_: albumentations.PlasmaShadow
       #   shadow_intensity_range: [0.3, 0.7]
       #   roughness: 3.0
