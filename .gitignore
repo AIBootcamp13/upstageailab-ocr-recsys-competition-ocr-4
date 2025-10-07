@@ -5,3 +5,4 @@ data/data.tar.gz
 __pycache__
 outputs/
 wandb/
+no_bg_images.tar.gz
