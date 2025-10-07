@@ -52,7 +52,7 @@ def train(config):
             default_hp_metric=False,
         )
 
-    checkpoint_path = config.checkpoint_dir
+    checkpoint_path = config.get("checkpoint_dir", "outputs/default/checkpoints")
 
     callbacks = [
         LearningRateMonitor(logging_interval='step'),

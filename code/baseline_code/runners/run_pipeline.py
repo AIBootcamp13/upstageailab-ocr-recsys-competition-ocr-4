@@ -53,12 +53,12 @@ def main():
     else:
         preset = sys.argv[1] if len(sys.argv) > 1 else "example"
         start_step = 1
-        # config에서 base exp_name 가져오기
-        config_path = Path('code/baseline_code/configs/preset', f'{preset}.yaml')
-        if config_path.exists():
+        # train.yaml에서 exp_name 가져오기
+        train_config_path = Path('code/baseline_code/configs/train.yaml')
+        if train_config_path.exists():
             try:
-                config = OmegaConf.load(str(config_path))
-                base_exp_name = getattr(config, 'exp_name', 'convnext_base')
+                train_config = OmegaConf.load(str(train_config_path))
+                base_exp_name = getattr(train_config, 'exp_name', 'convnext_base')
                 if base_exp_name is None:
                     base_exp_name = 'convnext_base'
             except:

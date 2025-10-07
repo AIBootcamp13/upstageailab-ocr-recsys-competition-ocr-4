@@ -5,7 +5,7 @@ defaults:
   - override hydra/job_logging: disabled
 
 seed: 42
-exp_name: "convnext_base_384_in22ft1k_dbpp_sweet_best"
+exp_name: "convnext_base_384_640"
 project_name: "OCRProject"
 
 wandb: True
