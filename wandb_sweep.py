@@ -286,7 +286,7 @@ def train_with_sweep():
     # 기본 설정
     overrides.extend([
         "preset=example",
-        f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
+        # f"dataset_base_path={os.environ.get('DATASET_BASE_PATH', '/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/')}",
         f"exp_name={sweep_exp_name}",
         "wandb=True"
     ])
