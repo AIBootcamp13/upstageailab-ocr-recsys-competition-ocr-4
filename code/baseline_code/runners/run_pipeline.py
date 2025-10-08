@@ -42,12 +42,14 @@ def main():
             if not ckpts:
                 print("no ckpts found")
                 return
-            def extract_hmean(path):
-                match = re.search(r'-([0-9]+\.\d+)', path.name)
+            def extract_hmean_with_epoch(path):
+                match = re.search(r'epoch=(\d+)-val/hmean=([0-9]+\.\d+)', path.name)
                 if match:
-                    return float(match.group(1))
-                return float('-inf')
-            best_ckpt = max(ckpts, key=extract_hmean)
+                    epoch = int(match.group(1))
+                    hmean = float(match.group(2))
+                    return (hmean, epoch)
+                return (float('-inf'), 0)
+            best_ckpt = max(ckpts, key=extract_hmean_with_epoch)
             checkpoint_path = str(best_ckpt)
             print(f"초기화 단계 건너뜁니다. exp_name: {exp_name} (best hmean: {best_ckpt.name})")
     else:
@@ -84,6 +86,7 @@ def main():
 
     # 2단계: 최고 효율 checkpoint로 검증/테스트 실행
     print("2단계: 최고 효율 checkpoint로 검증/테스트 실행 중...")
+    print(f"Using checkpoint: {checkpoint_path}")
     test_cmd = ["uv", "run", "python", "code/baseline_code/runners/test.py", f"preset={preset}", f"checkpoint_path='{checkpoint_path}'"]
     subprocess.run(test_cmd, check=True, env=dict(os.environ, HYDRA_FULL_ERROR='1'))
 

@@ -57,7 +57,7 @@ def train(config):
     callbacks = [
         LearningRateMonitor(logging_interval='step'),
         ModelCheckpoint(dirpath=checkpoint_path,
-                        filename='{epoch}-{val/hmean:.3f}',
+                        filename='{epoch}-val/hmean={val/hmean:.5f}',
                         save_top_k=3, monitor='val/hmean', mode='max'),
     ]
 
@@ -82,13 +82,17 @@ def train(config):
     best_dir.mkdir(parents=True, exist_ok=True)
     checkpoints = list(Path(checkpoint_path).rglob("*.ckpt"))
     if checkpoints:
-        def extract_hmean(path):
-            match = re.search(r'-([0-9]+\.\d+)', path.name)
+        def extract_hmean_with_epoch(path):
+            match = re.search(r'epoch=(\d+)-val/hmean=([0-9]+\.\d+)', path.name)
             if match:
-                return float(match.group(1))
-            return float('-inf')
-        best_ckpt = max(checkpoints, key=extract_hmean)
+                epoch = int(match.group(1))
+                hmean = float(match.group(2))
+                return (hmean, epoch)
+            return (float('-inf'), 0)
+        best_ckpt = max(checkpoints, key=extract_hmean_with_epoch)
+        print(f"Selected best checkpoint: {best_ckpt.name}")
         shutil.copy(best_ckpt, best_dir / "model.ckpt")
+        shutil.copy(best_ckpt, best_dir / best_ckpt.name)
 
 
 if __name__ == "__main__":
