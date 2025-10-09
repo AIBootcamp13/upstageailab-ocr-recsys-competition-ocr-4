@@ -3,6 +3,7 @@
 models:
   encoder:
     _target_: ocr.models.encoder.TimmBackbone
-    model_name: 'convnext_base_384_in22ft1k'
+    model_name: 'convnext_base.fb_in22k_ft_in1k_384'
+    # model_name: 'convnext_base.clip_laion2b_augreg_ft_in12k_in1k_384'
     select_features: [0, 1, 2, 3]            # Output layer
     pretrained: true

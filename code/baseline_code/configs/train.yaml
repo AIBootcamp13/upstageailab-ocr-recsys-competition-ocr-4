@@ -5,7 +5,8 @@ defaults:
   - override hydra/job_logging: disabled
 
 seed: 42
-exp_name: "convnext_base_384_1024_brcn"
+exp_name: "convnext_base.fb_in22k_ft_in1k_384_shadow"
+# exp_name: "convnext_base.clip_laion2b_augreg_ft_in12k_in1k_384"
 project_name: "OCRProject"
 
 wandb: True
@@ -14,7 +15,7 @@ exp_version: "v1.0"
 resume: null
 
 trainer:
-  max_epochs: 15
+  max_epochs: 20
   num_sanity_val_steps: 1
   log_every_n_steps: 50
   check_val_every_n_epoch: 1
