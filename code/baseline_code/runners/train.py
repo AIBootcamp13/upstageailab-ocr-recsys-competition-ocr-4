@@ -57,7 +57,7 @@ def train(config):
     callbacks = [
         LearningRateMonitor(logging_interval='step'),
         ModelCheckpoint(dirpath=checkpoint_path,
-                        filename='{epoch}-val/hmean={val/hmean:.5f}',
+                        filename='{epoch}-{val/hmean:.5f}',
                         save_top_k=3, monitor='val/hmean', mode='max'),
     ]
 
@@ -83,7 +83,7 @@ def train(config):
     checkpoints = list(Path(checkpoint_path).rglob("*.ckpt"))
     if checkpoints:
         def extract_hmean_with_epoch(path):
-            match = re.search(r'epoch=(\d+)-val/hmean=([0-9]+\.\d+)', path.name)
+            match = re.search(r'epoch=(\d+)-([0-9]+\.\d+)', path.name)
             if match:
                 epoch = int(match.group(1))
                 hmean = float(match.group(2))

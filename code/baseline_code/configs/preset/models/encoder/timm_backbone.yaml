@@ -3,7 +3,6 @@
 models:
   encoder:
     _target_: ocr.models.encoder.TimmBackbone
-    model_name: 'convnext_base.fb_in22k_ft_in1k_384'
-    # model_name: 'convnext_base.clip_laion2b_augreg_ft_in12k_in1k_384'
-    select_features: [0, 1, 2, 3]            # Output layer
+    model_name: 'hrnet_w44.ms_in1k'
+    select_features: [1, 2, 3, 4]            # Output layer, skip lowest resolution
     pretrained: true
