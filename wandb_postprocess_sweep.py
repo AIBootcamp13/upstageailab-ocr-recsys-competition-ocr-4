@@ -23,7 +23,7 @@ import wandb
 from dotenv import load_dotenv
 from hydra import compose, initialize_config_dir
 from hydra.core.global_hydra import GlobalHydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 load_dotenv()
 
@@ -46,15 +46,20 @@ class SweepResult:
     metrics: Dict[str, float]
 
 
+@dataclass
+class RuntimeState:
+    trainer: pl.Trainer
+    model_module: pl.LightningModule
+    data_module: pl.LightningDataModule
+    postprocess_module: object
+    config: DictConfig
+
+
 def compose_base_config(overrides: List[str]) -> DictConfig:
     GlobalHydra.instance().clear()
     with initialize_config_dir(version_base="1.2", config_dir=DEFAULT_CONFIG_DIR):
         cfg = compose(config_name="test", overrides=overrides)
     return cfg
-
-
-def clone_config(config: DictConfig) -> DictConfig:
-    return OmegaConf.create(OmegaConf.to_container(config, resolve=False))
 
 
 def _format_param(params: Dict[str, float], key: str) -> str:
@@ -76,35 +81,6 @@ def format_result(result: SweepResult) -> str:
         f"precision={metrics.get('test/precision', float('nan')):.4f}, "
         f"hmean={metrics.get('test/hmean', float('nan')):.4f}"
     )
-
-
-def evaluate_config(config: DictConfig) -> Dict[str, float]:
-    pl.seed_everything(config.get("seed", 42), workers=True)
-
-    model_module, data_module = get_pl_modules_by_cfg(config)
-
-    trainer = pl.Trainer(
-        logger=False,
-        enable_checkpointing=False,
-        enable_model_summary=False,
-        enable_progress_bar=False,
-        deterministic=True,
-    )
-
-    results = trainer.test(model_module, data_module, ckpt_path=config.checkpoint_path)
-    if not results:
-        raise RuntimeError("Lightning trainer did not return any test metrics.")
-
-    converted = {}
-    for key, value in results[0].items():
-        if hasattr(value, "item"):
-            converted[key] = float(value.item())
-        else:
-            converted[key] = float(value)
-
-    torch.cuda.empty_cache()
-
-    return converted
 
 
 DEFAULT_EXP_NAME = "hrnet_w44_1024_reproduction"
@@ -180,9 +156,10 @@ def build_overrides(exp_name: str, extra_overrides: List[str]) -> List[str]:
 
 
 def apply_postprocess_params(config, params: Dict[str, float]) -> None:
-    post_cfg = config.models.head.postprocess
+    module = config.models.head.postprocess
+    resize_cfg = config.models.head.postprocess
     for key, value in params.items():
-        post_cfg[key] = value
+        module[key] = value
 
 
 def extract_postprocess_params(wandb_config) -> Dict[str, float]:
@@ -190,31 +167,87 @@ def extract_postprocess_params(wandb_config) -> Dict[str, float]:
     for key in POSTPROCESS_KEYS:
         if key in wandb_config:
             params[key] = float(wandb_config[key])
+        elif key in DEFAULT_POSTPROCESS_PARAMS:
+            params[key] = float(DEFAULT_POSTPROCESS_PARAMS[key])
     return params
 
 
-def evaluate_postprocess_run(
+def build_runtime_state(
     checkpoint_path: Path,
     exp_name: str,
     extra_overrides: List[str],
-    params: Dict[str, float],
-) -> Dict[str, float]:
+) -> RuntimeState:
     overrides = build_overrides(exp_name, extra_overrides)
     base_cfg = compose_base_config(overrides)
     base_cfg.checkpoint_path = str(checkpoint_path.resolve())
 
-    current_cfg = clone_config(base_cfg)
-    apply_postprocess_params(current_cfg, params)
+    pl.seed_everything(base_cfg.get("seed", 42), workers=True)
 
-    metrics = evaluate_config(current_cfg)
+    model_module, data_module = get_pl_modules_by_cfg(base_cfg)
+
+    checkpoint = torch.load(base_cfg.checkpoint_path, map_location="cpu")
+    state_dict = checkpoint.get("state_dict", checkpoint)
+    model_module.load_state_dict(state_dict)
+    model_module.eval()
+
+    trainer = pl.Trainer(
+        accelerator="auto",
+        devices=1,
+        logger=False,
+        enable_checkpointing=False,
+        enable_model_summary=False,
+        enable_progress_bar=False,
+        deterministic=True,
+    )
+
+    if hasattr(data_module, "prepare_data"):
+        data_module.prepare_data()
+    if hasattr(data_module, "setup"):
+        data_module.setup(stage="test")
+
+    postprocess_module = getattr(model_module.model.head, "postprocess", None)
+    if postprocess_module is None:
+        raise AttributeError("모델에서 postprocess 객체를 찾을 수 없습니다.")
+
+    return RuntimeState(
+        trainer=trainer,
+        model_module=model_module,
+        data_module=data_module,
+        postprocess_module=postprocess_module,
+        config=base_cfg,
+    )
+
+
+def run_inference(state: RuntimeState, params: Dict[str, float]) -> Dict[str, float]:
+    for key, value in params.items():
+        if hasattr(state.postprocess_module, key):
+            setattr(state.postprocess_module, key, float(value))
+        else:
+            raise AttributeError(f"postprocess 모듈에 '{key}' 속성이 없습니다.")
+
+    if hasattr(state.model_module, "test_step_outputs"):
+        state.model_module.test_step_outputs.clear()
+    if hasattr(state.model_module, "metric") and hasattr(state.model_module.metric, "reset"):
+        state.model_module.metric.reset()
+
+    dataloader = state.data_module.test_dataloader()
+    results = state.trainer.test(
+        state.model_module,
+        dataloaders=dataloader,
+        verbose=False,
+    )
+    if not results:
+        raise RuntimeError("테스트 메트릭을 얻지 못했습니다.")
+
+    metrics: Dict[str, float] = {}
+    for key, value in results[0].items():
+        metrics[key] = float(value.item()) if hasattr(value, "item") else float(value)
+
+    torch.cuda.empty_cache()
     return metrics
 
 
-def run_sweep_trial(
-    checkpoint_path: Path,
-    exp_name: str,
-    extra_overrides: List[str],
-) -> None:
+def run_sweep_trial(state: RuntimeState) -> None:
     timestamp = datetime.now().strftime("%y%m%d_%H%M%S")
     run_name = f"postprocess_{timestamp}"
     wandb.init(
@@ -222,7 +255,7 @@ def run_sweep_trial(
         config=dict(DEFAULT_POSTPROCESS_PARAMS),
     )
     sweep_params = extract_postprocess_params(wandb.config)
-    metrics = evaluate_postprocess_run(checkpoint_path, exp_name, extra_overrides, sweep_params)
+    metrics = run_inference(state, sweep_params)
 
     wandb.log(metrics)
     if "test/hmean" in metrics:
@@ -254,14 +287,12 @@ def create_sweep(config_path: Path, project: str, entity: str | None) -> str:
 
 def start_agent(
     sweep_id: str,
-    checkpoint_path: Path,
-    exp_name: str,
-    extra_overrides: List[str],
     project: str,
     entity: str | None,
     count: int,
+    state: RuntimeState,
 ) -> None:
-    runner = lambda: run_sweep_trial(checkpoint_path, exp_name, extra_overrides)
+    runner = lambda: run_sweep_trial(state)
     wandb.agent(
         sweep_id,
         function=runner,
@@ -315,22 +346,21 @@ def main() -> None:
     if args.sweep_id:
         if not args.checkpoint:
             raise ValueError("--sweep-id 사용 시 --checkpoint 인자를 제공해야 합니다.")
+        state = build_runtime_state(args.checkpoint, args.exp_name, args.overrides)
         start_agent(
             sweep_id=args.sweep_id,
-            checkpoint_path=args.checkpoint,
-            exp_name=args.exp_name,
-            extra_overrides=args.overrides,
             project=args.project,
             entity=args.entity,
             count=args.count,
+            state=state,
         )
         return
 
     if args.checkpoint:
+        state = build_runtime_state(args.checkpoint, args.exp_name, args.overrides)
         wandb.init(config=dict(DEFAULT_POSTPROCESS_PARAMS), mode="disabled")
-        params = dict(DEFAULT_POSTPROCESS_PARAMS)
-        metrics = evaluate_postprocess_run(args.checkpoint, args.exp_name, args.overrides, params)
-        result = SweepResult(params=params, metrics=metrics)
+        metrics = run_inference(state, dict(DEFAULT_POSTPROCESS_PARAMS))
+        result = SweepResult(params=dict(DEFAULT_POSTPROCESS_PARAMS), metrics=metrics)
         print("단일 평가 실행 결과:")
         print(format_result(result))
         return
