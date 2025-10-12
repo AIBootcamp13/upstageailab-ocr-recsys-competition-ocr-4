@@ -12,25 +12,99 @@
 import argparse
 import os
 import sys
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List
 
+import lightning.pytorch as pl
+import torch
 import wandb
 from dotenv import load_dotenv
+from hydra import compose, initialize_config_dir
+from hydra.core.global_hydra import GlobalHydra
+from omegaconf import DictConfig, OmegaConf
 
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(PROJECT_ROOT))
+BASELINE_CODE_ROOT = PROJECT_ROOT / "code" / "baseline_code"
 
-from code.baseline_code.runners.tune_postprocess import (  # noqa: E402
-    SweepResult,
-    clone_config,
-    compose_base_config,
-    evaluate_config,
-    format_result,
-)
+sys.path.insert(0, str(BASELINE_CODE_ROOT))
+
+from ocr.lightning_modules import get_pl_modules_by_cfg  # noqa: E402
+
+DEFAULT_CONFIG_DIR = os.environ.get("OP_CONFIG_DIR")
+if DEFAULT_CONFIG_DIR is None:
+    DEFAULT_CONFIG_DIR = BASELINE_CODE_ROOT / "configs"
+DEFAULT_CONFIG_DIR = str(Path(DEFAULT_CONFIG_DIR).resolve())
+
+
+@dataclass
+class SweepResult:
+    params: Dict[str, float]
+    metrics: Dict[str, float]
+
+
+def compose_base_config(overrides: List[str]) -> DictConfig:
+    GlobalHydra.instance().clear()
+    with initialize_config_dir(version_base="1.2", config_dir=DEFAULT_CONFIG_DIR):
+        cfg = compose(config_name="test", overrides=overrides)
+    return cfg
+
+
+def clone_config(config: DictConfig) -> DictConfig:
+    return OmegaConf.create(OmegaConf.to_container(config, resolve=False))
+
+
+def _format_param(params: Dict[str, float], key: str) -> str:
+    value = params.get(key)
+    if value is None:
+        return "base"
+    return f"{value:.3f}"
+
+
+def format_result(result: SweepResult) -> str:
+    params = result.params
+    metrics = result.metrics
+    return (
+        f"thresh={_format_param(params, 'thresh')}, "
+        f"box_thresh={_format_param(params, 'box_thresh')}, "
+        f"box_unclip_ratio={_format_param(params, 'box_unclip_ratio')}, "
+        f"polygon_unclip_ratio={_format_param(params, 'polygon_unclip_ratio')} -> "
+        f"recall={metrics.get('test/recall', float('nan')):.4f}, "
+        f"precision={metrics.get('test/precision', float('nan')):.4f}, "
+        f"hmean={metrics.get('test/hmean', float('nan')):.4f}"
+    )
+
+
+def evaluate_config(config: DictConfig) -> Dict[str, float]:
+    pl.seed_everything(config.get("seed", 42), workers=True)
+
+    model_module, data_module = get_pl_modules_by_cfg(config)
+
+    trainer = pl.Trainer(
+        logger=False,
+        enable_checkpointing=False,
+        enable_model_summary=False,
+        enable_progress_bar=False,
+        deterministic=True,
+    )
+
+    results = trainer.test(model_module, data_module, ckpt_path=config.checkpoint_path)
+    if not results:
+        raise RuntimeError("Lightning trainer did not return any test metrics.")
+
+    converted = {}
+    for key, value in results[0].items():
+        if hasattr(value, "item"):
+            converted[key] = float(value.item())
+        else:
+            converted[key] = float(value)
+
+    torch.cuda.empty_cache()
+
+    return converted
 
 
 DEFAULT_EXP_NAME = "hrnet_w44_1024_reproduction"
@@ -67,7 +141,6 @@ BASELINE_OVERRIDES: List[str] = [
     "~models.scheduler.step_size",
     "~models.scheduler.gamma",
     "+models.scheduler.T_max=15",
-    "trainer.max_epochs=20",
     "collate_fn.shrink_ratio=0.428584820771695",
     "collate_fn.thresh_max=0.7506908133484191",
     "collate_fn.thresh_min=0.33967147700431666",
