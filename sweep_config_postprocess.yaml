@@ -1,0 +1,19 @@
+method: bayes
+metric:
+  name: test/hmean
+  goal: maximize
+parameters:
+  thresh:
+    min: 0.20
+    max: 0.25
+  box_thresh:
+    min: 0.40
+    max: 0.46
+  box_unclip_ratio:
+    min: 1.30
+    max: 1.60
+  polygon_unclip_ratio:
+    min: 1.70
+    max: 2.10
+project: ocr-postprocess
+entity: null

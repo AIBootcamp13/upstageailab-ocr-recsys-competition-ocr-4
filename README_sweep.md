@@ -64,8 +64,32 @@ wandb agent your_sweep_id
 
 ```bash
 # Sweep 설정 미리보기
-python wandb_sweep.py
+uv run python wandb_sweep.py
 ```
+
+## 후처리 전용 Sweep (추론만 수행)
+
+이미 학습된 체크포인트를 사용해 `models.head.postprocess.*` 파라미터만 탐색하고 싶다면 `wandb_postprocess_sweep.py`와 `sweep_config_postprocess.yaml`을 사용한다. 기본 설정은 아래 명령으로 재현하였다.
+
+```bash
+uv run python wandb_postprocess_sweep.py --create-sweep --config-path sweep_config_postprocess.yaml
+```
+
+생성된 sweep ID를 사용해 에이전트를 실행한다. 이때 반드시 평가에 사용할 체크포인트 경로를 지정해야 한다.
+
+```bash
+uv run python wandb_postprocess_sweep.py --sweep-id your_sweep_id \
+  --checkpoint outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt \
+  --count 30
+```
+
+후처리 파라미터를 직접 지정해 단일 평가지표를 확인할 수도 있다.
+
+```bash
+uv run python wandb_postprocess_sweep.py --checkpoint outputs/hrnet_full/checkpoints/epoch=9-step=2050.ckpt
+```
+
+이 스크립트는 학습을 다시 수행하지 않고, 사용자가 명시한 베이스라인 파라미터를 고정한 뒤 후처리 값만 WandB sweep으로 탐색한다.
 
 ## 최적화 파라미터
 
@@ -100,13 +124,13 @@ python wandb_sweep.py
 
 ### 빠른 테스트 (5회 실행)
 ```bash
-python wandb_sweep.py --create-sweep
+uv run python wandb_sweep.py --create-sweep
 wandb agent your_sweep_id --count 5
 ```
 
 ### 전체 최적화 (50회 실행)
 ```bash
-python wandb_sweep.py --create-sweep
+uv run python wandb_sweep.py --create-sweep
 wandb agent your_sweep_id --count 50
 ```
 
