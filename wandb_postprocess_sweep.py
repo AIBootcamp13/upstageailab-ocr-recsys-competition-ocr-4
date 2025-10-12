@@ -181,6 +181,8 @@ def build_runtime_state(
     base_cfg = compose_base_config(overrides)
     base_cfg.checkpoint_path = str(checkpoint_path.resolve())
 
+    print(f"[RuntimeState] 모델 로드 시작: checkpoint={base_cfg.checkpoint_path}")
+
     pl.seed_everything(base_cfg.get("seed", 42), workers=True)
 
     model_module, data_module = get_pl_modules_by_cfg(base_cfg)
@@ -219,6 +221,7 @@ def build_runtime_state(
 
 
 def run_inference(state: RuntimeState, params: Dict[str, float]) -> Dict[str, float]:
+    print("[RuntimeState] 기존 모델/트레이너 재사용, 후처리 파라미터 적용:", params)
     for key, value in params.items():
         if hasattr(state.postprocess_module, key):
             setattr(state.postprocess_module, key, float(value))
