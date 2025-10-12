@@ -206,6 +206,28 @@ rbc_b32_c28_p40
 Leaderboard:
 0.9870 / 0.9869 / 0.9874
 
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+       Test metric             DataLoader 0
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+       test/hmean           0.9850713014602661
+     test/precision         0.9830842018127441
+       test/recall          0.9875101447105408
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Best checkpoint epoch: 17
+Predicting DataLoader 0: 100%|##########| 413/413 [00:46<00:00,  8.95it/s]
+Submission JSON saved to: /root/dev/upstageailab-ocr-recsys-competition-ocr-4-fork/outputs/2025-10-12/16-59-34/submissions/20251012_221528.json
+Submission CSV saved to: /root/dev/upstageailab-ocr-recsys-competition-ocr-4-fork/outputs/2025-10-12/16-59-34/submissions/20251012_221528.csv (best epoch: 17)
+Submission CSV uploaded as WandB artifact: submission_csv_f2eua7a5
+
+
+
+
+
+
+
+
+
+
 best 증강 sweep
 brightness_contrast_p:0.17099417286429375
 brightness_limit:0.34146436314408957
