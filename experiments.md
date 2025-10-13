@@ -221,6 +221,65 @@ Submission CSV uploaded as WandB artifact: submission_csv_f2eua7a5
 
 
 
+후처리 sweep
+box_thresh:0.4008455515878936
+box_unclip_ratio:1.8748531609404064
+polygon_unclip_ratio:1.3102306936503645
+thresh:0.15048754740586018
+
+outputs/2025-10-12/16-59-34/checkpoints/epoch=17-step=29448.ckpt 이 체크포인트와 아래 파라미터를 사용해서, 제출 csv를 만들어줘.
+uv run python runners/train.py preset=example models.encoder.model_name=hrnet_w44 models.encoder.select_features=[1,2,3,4] models.decoder.in_channels=[128,256,512,1024] transforms.train_transform.transforms.0.max_size=1024 transforms.train_transform.transforms.1.min_width=1024 transforms.train_transform.transforms.1.min_height=1024 transforms.val_transform.transforms.0.max_size=1024 transforms.val_transform.transforms.1.min_width=1024 transforms.val_transform.transforms.1.min_height=1024 transforms.test_transform.transforms.0.max_size=1024 transforms.test_transform.transforms.1.min_width=1024 transforms.test_transform.transforms.1.min_height=1024 dataloaders.train_dataloader.batch_size=2 dataloaders.val_dataloader.batch_size=2 dataloaders.test_dataloader.batch_size=2 models.head.postprocess.thresh=0.15048754740586018 models.head.postprocess.box_thresh=0.4008455515878936 models.head.postprocess.box_unclip_ratio=1.8748531609404064 models.head.postprocess.polygon_unclip_ratio=1.3102306936503645 models.loss.negative_ratio=2.824132345320219 models.loss.prob_map_loss_weight=3.591196851512631 models.loss.thresh_map_loss_weight=8.028627860143937 models.loss.binary_map_loss_weight=0.6919312670387725 models.head.k=45 models.optimizer._target_=torch.optim.AdamW models.optimizer.lr=0.0013358832166152786 models.optimizer.weight_decay=0.0003571900294890783 models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR ~models.scheduler.step_size ~models.scheduler.gamma +models.scheduler.T_max=10 trainer.max_epochs=10 collate_fn.shrink_ratio=0.428584820771695 collate_fn.thresh_max=0.7506908133484191 collate_fn.thresh_min=0.33967147700431666 exp_name=hrnet_w44_1024_reproduction wandb=true
+
+uv run python runners/predict.py \
+    preset=example \
+    "checkpoint_path='/root/dev/upstageailab-ocr-recsys-competition-ocr-4-fork/outputs/2025-10-12/16-59-34/checkpoints/epoch=17-step=29448.ckpt'" \
+    dataset_base_path=/root/dev/upstageailab-ocr-recsys-competition-ocr-4-fork/data/datasets/ \
+    models.encoder.model_name=hrnet_w44 \
+    models.encoder.select_features=[1,2,3,4] \
+    models.decoder.in_channels=[128,256,512,1024] \
+    transforms.train_transform.transforms.0.max_size=1024 \
+    transforms.train_transform.transforms.1.min_width=1024 \
+    transforms.train_transform.transforms.1.min_height=1024 \
+    transforms.val_transform.transforms.0.max_size=1024 \
+    transforms.val_transform.transforms.1.min_width=1024 \
+    transforms.val_transform.transforms.1.min_height=1024 \
+    transforms.test_transform.transforms.0.max_size=1024 \
+    transforms.test_transform.transforms.1.min_width=1024 \
+    transforms.test_transform.transforms.1.min_height=1024 \
+    transforms.predict_transform.transforms.0.max_size=1024 \
+    transforms.predict_transform.transforms.1.min_width=1024 \
+    transforms.predict_transform.transforms.1.min_height=1024 \
+    dataloaders.train_dataloader.batch_size=2 \
+    dataloaders.val_dataloader.batch_size=2 \
+    dataloaders.test_dataloader.batch_size=2 \
+    dataloaders.predict_dataloader.batch_size=2 \
+    models.head.postprocess.thresh=0.15048754740586018 \
+    models.head.postprocess.box_thresh=0.4008455515878936 \
+    models.head.postprocess.box_unclip_ratio=1.8748531609404064 \
+    models.head.postprocess.polygon_unclip_ratio=1.3102306936503645 \
+    models.loss.negative_ratio=2.824132345320219 \
+    models.loss.prob_map_loss_weight=3.591196851512631 \
+    models.loss.thresh_map_loss_weight=8.028627860143937 \
+    models.loss.binary_map_loss_weight=0.6919312670387725 \
+    models.head.k=45 \
+    models.optimizer._target_=torch.optim.AdamW \
+    models.optimizer.lr=0.0013358832166152786 \
+    models.optimizer.weight_decay=0.0003571900294890783 \
+    models.scheduler._target_=torch.optim.lr_scheduler.CosineAnnealingLR \
+    '~models.scheduler.step_size' \
+    '~models.scheduler.gamma' \
+    +models.scheduler.T_max=10 \
+    collate_fn.shrink_ratio=0.428584820771695 \
+    collate_fn.thresh_max=0.7506908133484191 \
+    collate_fn.thresh_min=0.33967147700431666 \
+    exp_name=hrnet_w44_1024_reproduction \
+    +wandb=true
+      - test/hmean = 0.98681
+      - test/precision = 0.98607
+      - test/recall = 0.98788
+
+
+
 
 
 
