@@ -220,7 +220,7 @@ Submission CSV saved to: /root/dev/upstageailab-ocr-recsys-competition-ocr-4-for
 Submission CSV uploaded as WandB artifact: submission_csv_f2eua7a5
 
 
-
+---------------------------------
 후처리 sweep
 box_thresh:0.4008455515878936
 box_unclip_ratio:1.8748531609404064
@@ -274,12 +274,11 @@ uv run python runners/predict.py \
     collate_fn.thresh_min=0.33967147700431666 \
     exp_name=hrnet_w44_1024_reproduction \
     +wandb=true
-      - test/hmean = 0.98681
-      - test/precision = 0.98607
-      - test/recall = 0.98788
-
-
-
+- test/hmean = 0.98681
+- test/precision = 0.98607
+- test/recall = 0.98788
+LeaderBoard : 0.9886 / 0.9886 / 0.9888
+---------------------------------
 
 
 
