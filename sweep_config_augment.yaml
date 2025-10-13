@@ -36,15 +36,15 @@ parameters:
   #   max: 0.5
 
   # 3. RandomGamma (train_transform.transforms[5])
-  gamma_limit_lower:
-    min: 70
-    max: 90
-  gamma_limit_upper:
-    min: 110
-    max: 130
-  random_gamma_p:
-    min: 0.0
-    max: 0.5
+  # gamma_limit_lower:
+  #   min: 70
+  #   max: 90
+  # gamma_limit_upper:
+  #   min: 110
+  #   max: 130
+  # random_gamma_p:
+  #   min: 0.0
+  #   max: 0.5
 
   # # 4. HueSaturationValue (train_transform.transforms[6])
   # hue_shift_limit:
@@ -61,12 +61,12 @@ parameters:
   #   max: 0.5
 
   # 5. GaussianBlur (train_transform.transforms[7])
-  gaussian_blur_limit:
-    min: 3
-    max: 9
-  gaussian_blur_p:
-    min: 0.0
-    max: 0.4
+  # gaussian_blur_limit:
+  #   min: 3
+  #   max: 9
+  # gaussian_blur_p:
+  #   min: 0.0
+  #   max: 0.4
 
   # # 6. MotionBlur (train_transform.transforms[8])
   # motion_blur_limit:

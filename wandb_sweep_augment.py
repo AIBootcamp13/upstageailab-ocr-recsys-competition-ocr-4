@@ -235,140 +235,140 @@ def train_with_sweep():
     #     )
 
     # 3. RandomGamma
-    gamma_limit_lower = int(sweep_config.get('gamma_limit_lower', 80))
-    gamma_limit_upper = int(sweep_config.get('gamma_limit_upper', 120))
-    random_gamma_p = sweep_config.get('random_gamma_p', 0.3)
-    if apply_transform_params(
-        'albumentations.RandomGamma',
-        {
-            'gamma_limit': [gamma_limit_lower, gamma_limit_upper],
-            'p': random_gamma_p,
-        },
-        'RandomGamma',
-    ):
-        applied_logs.append(
-            f"RandomGamma: gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}], p={random_gamma_p}"
-        )
+    # gamma_limit_lower = int(sweep_config.get('gamma_limit_lower', 80))
+    # gamma_limit_upper = int(sweep_config.get('gamma_limit_upper', 120))
+    # random_gamma_p = sweep_config.get('random_gamma_p', 0.3)
+    # if apply_transform_params(
+    #     'albumentations.RandomGamma',
+    #     {
+    #         'gamma_limit': [gamma_limit_lower, gamma_limit_upper],
+    #         'p': random_gamma_p,
+    #     },
+    #     'RandomGamma',
+    # ):
+    #     applied_logs.append(
+    #         f"RandomGamma: gamma_limit=[{gamma_limit_lower},{gamma_limit_upper}], p={random_gamma_p}"
+    #     )
 
     # 4. HueSaturationValue
-    hue_shift_limit = int(sweep_config.get('hue_shift_limit', 20))
-    sat_shift_limit = int(sweep_config.get('sat_shift_limit', 30))
-    val_shift_limit = int(sweep_config.get('val_shift_limit', 20))
-    hsv_p = sweep_config.get('hsv_p', 0.3)
-    if apply_transform_params(
-        'albumentations.HueSaturationValue',
-        {
-            'hue_shift_limit': hue_shift_limit,
-            'sat_shift_limit': sat_shift_limit,
-            'val_shift_limit': val_shift_limit,
-            'p': hsv_p,
-        },
-        'HueSaturationValue',
-    ):
-        applied_logs.append(
-            f"HueSaturationValue: hue_shift_limit={hue_shift_limit}, sat_shift_limit={sat_shift_limit}, val_shift_limit={val_shift_limit}, p={hsv_p}"
-        )
+    # hue_shift_limit = int(sweep_config.get('hue_shift_limit', 20))
+    # sat_shift_limit = int(sweep_config.get('sat_shift_limit', 30))
+    # val_shift_limit = int(sweep_config.get('val_shift_limit', 20))
+    # hsv_p = sweep_config.get('hsv_p', 0.3)
+    # if apply_transform_params(
+    #     'albumentations.HueSaturationValue',
+    #     {
+    #         'hue_shift_limit': hue_shift_limit,
+    #         'sat_shift_limit': sat_shift_limit,
+    #         'val_shift_limit': val_shift_limit,
+    #         'p': hsv_p,
+    #     },
+    #     'HueSaturationValue',
+    # ):
+    #     applied_logs.append(
+    #         f"HueSaturationValue: hue_shift_limit={hue_shift_limit}, sat_shift_limit={sat_shift_limit}, val_shift_limit={val_shift_limit}, p={hsv_p}"
+    #     )
 
     # 5. GaussianBlur
-    gaussian_blur_limit = int(sweep_config.get('gaussian_blur_limit', 5))
-    if gaussian_blur_limit % 2 == 0:
-        gaussian_blur_limit += 1
-    gaussian_blur_p = sweep_config.get('gaussian_blur_p', 0.2)
-    if apply_transform_params(
-        'albumentations.GaussianBlur',
-        {
-            'blur_limit': [3, gaussian_blur_limit],
-            'p': gaussian_blur_p,
-        },
-        'GaussianBlur',
-    ):
-        applied_logs.append(
-            f"GaussianBlur: blur_limit=[3,{gaussian_blur_limit}], p={gaussian_blur_p}"
-        )
+    # gaussian_blur_limit = int(sweep_config.get('gaussian_blur_limit', 5))
+    # if gaussian_blur_limit % 2 == 0:
+    #     gaussian_blur_limit += 1
+    # gaussian_blur_p = sweep_config.get('gaussian_blur_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.GaussianBlur',
+    #     {
+    #         'blur_limit': [3, gaussian_blur_limit],
+    #         'p': gaussian_blur_p,
+    #     },
+    #     'GaussianBlur',
+    # ):
+    #     applied_logs.append(
+    #         f"GaussianBlur: blur_limit=[3,{gaussian_blur_limit}], p={gaussian_blur_p}"
+    #     )
 
     # 6. MotionBlur
-    motion_blur_limit = int(sweep_config.get('motion_blur_limit', 5))
-    if motion_blur_limit % 2 == 0:
-        motion_blur_limit += 1
-    motion_blur_p = sweep_config.get('motion_blur_p', 0.2)
-    if apply_transform_params(
-        'albumentations.MotionBlur',
-        {
-            'blur_limit': [3, motion_blur_limit],
-            'p': motion_blur_p,
-        },
-        'MotionBlur',
-    ):
-        applied_logs.append(
-            f"MotionBlur: blur_limit=[3,{motion_blur_limit}], p={motion_blur_p}"
-        )
+    # motion_blur_limit = int(sweep_config.get('motion_blur_limit', 5))
+    # if motion_blur_limit % 2 == 0:
+    #     motion_blur_limit += 1
+    # motion_blur_p = sweep_config.get('motion_blur_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.MotionBlur',
+    #     {
+    #         'blur_limit': [3, motion_blur_limit],
+    #         'p': motion_blur_p,
+    #     },
+    #     'MotionBlur',
+    # ):
+    #     applied_logs.append(
+    #         f"MotionBlur: blur_limit=[3,{motion_blur_limit}], p={motion_blur_p}"
+    #     )
 
     # 7. GaussNoise
-    gauss_noise_std_lower = sweep_config.get('gauss_noise_std_lower', 0.02)
-    gauss_noise_std_upper = sweep_config.get('gauss_noise_std_upper', 0.08)
-    gauss_noise_p = sweep_config.get('gauss_noise_p', 0.2)
-    if apply_transform_params(
-        'albumentations.GaussNoise',
-        {
-            'std_range': [gauss_noise_std_lower, gauss_noise_std_upper],
-            'p': gauss_noise_p,
-        },
-        'GaussNoise',
-    ):
-        applied_logs.append(
-            f"GaussNoise: std_range=[{gauss_noise_std_lower},{gauss_noise_std_upper}], p={gauss_noise_p}"
-        )
+    # gauss_noise_std_lower = sweep_config.get('gauss_noise_std_lower', 0.02)
+    # gauss_noise_std_upper = sweep_config.get('gauss_noise_std_upper', 0.08)
+    # gauss_noise_p = sweep_config.get('gauss_noise_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.GaussNoise',
+    #     {
+    #         'std_range': [gauss_noise_std_lower, gauss_noise_std_upper],
+    #         'p': gauss_noise_p,
+    #     },
+    #     'GaussNoise',
+    # ):
+    #     applied_logs.append(
+    #         f"GaussNoise: std_range=[{gauss_noise_std_lower},{gauss_noise_std_upper}], p={gauss_noise_p}"
+    #     )
 
     # 8. ImageCompression
-    compression_quality_lower = int(sweep_config.get('compression_quality_lower', 75))
-    compression_quality_upper = int(sweep_config.get('compression_quality_upper', 100))
-    image_compression_p = sweep_config.get('image_compression_p', 0.2)
-    if apply_transform_params(
-        'albumentations.ImageCompression',
-        {
-            'quality_range': [compression_quality_lower, compression_quality_upper],
-            'p': image_compression_p,
-        },
-        'ImageCompression',
-    ):
-        applied_logs.append(
-            f"ImageCompression: quality_range=[{compression_quality_lower},{compression_quality_upper}], p={image_compression_p}"
-        )
+    # compression_quality_lower = int(sweep_config.get('compression_quality_lower', 75))
+    # compression_quality_upper = int(sweep_config.get('compression_quality_upper', 100))
+    # image_compression_p = sweep_config.get('image_compression_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.ImageCompression',
+    #     {
+    #         'quality_range': [compression_quality_lower, compression_quality_upper],
+    #         'p': image_compression_p,
+    #     },
+    #     'ImageCompression',
+    # ):
+    #     applied_logs.append(
+    #         f"ImageCompression: quality_range=[{compression_quality_lower},{compression_quality_upper}], p={image_compression_p}"
+    #     )
 
     # 9. Sharpen
-    sharpen_alpha_lower = sweep_config.get('sharpen_alpha_lower', 0.2)
-    sharpen_alpha_upper = sweep_config.get('sharpen_alpha_upper', 0.5)
-    sharpen_lightness_lower = sweep_config.get('sharpen_lightness_lower', 0.5)
-    sharpen_lightness_upper = sweep_config.get('sharpen_lightness_upper', 1.0)
-    sharpen_p = sweep_config.get('sharpen_p', 0.2)
-    if apply_transform_params(
-        'albumentations.Sharpen',
-        {
-            'alpha': [sharpen_alpha_lower, sharpen_alpha_upper],
-            'lightness': [sharpen_lightness_lower, sharpen_lightness_upper],
-            'p': sharpen_p,
-        },
-        'Sharpen',
-    ):
-        applied_logs.append(
-            f"Sharpen: alpha=[{sharpen_alpha_lower},{sharpen_alpha_upper}], lightness=[{sharpen_lightness_lower},{sharpen_lightness_upper}], p={sharpen_p}"
-        )
+    # sharpen_alpha_lower = sweep_config.get('sharpen_alpha_lower', 0.2)
+    # sharpen_alpha_upper = sweep_config.get('sharpen_alpha_upper', 0.5)
+    # sharpen_lightness_lower = sweep_config.get('sharpen_lightness_lower', 0.5)
+    # sharpen_lightness_upper = sweep_config.get('sharpen_lightness_upper', 1.0)
+    # sharpen_p = sweep_config.get('sharpen_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.Sharpen',
+    #     {
+    #         'alpha': [sharpen_alpha_lower, sharpen_alpha_upper],
+    #         'lightness': [sharpen_lightness_lower, sharpen_lightness_upper],
+    #         'p': sharpen_p,
+    #     },
+    #     'Sharpen',
+    # ):
+    #     applied_logs.append(
+    #         f"Sharpen: alpha=[{sharpen_alpha_lower},{sharpen_alpha_upper}], lightness=[{sharpen_lightness_lower},{sharpen_lightness_upper}], p={sharpen_p}"
+    #     )
 
     # 10. Downscale
-    downscale_lower = sweep_config.get('downscale_lower', 0.75)
-    downscale_upper = sweep_config.get('downscale_upper', 0.95)
-    downscale_p = sweep_config.get('downscale_p', 0.2)
-    if apply_transform_params(
-        'albumentations.Downscale',
-        {
-            'scale_range': [downscale_lower, downscale_upper],
-            'p': downscale_p,
-        },
-        'Downscale',
-    ):
-        applied_logs.append(
-            f"Downscale: scale_range=[{downscale_lower},{downscale_upper}], p={downscale_p}"
-        )
+    # downscale_lower = sweep_config.get('downscale_lower', 0.75)
+    # downscale_upper = sweep_config.get('downscale_upper', 0.95)
+    # downscale_p = sweep_config.get('downscale_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.Downscale',
+    #     {
+    #         'scale_range': [downscale_lower, downscale_upper],
+    #         'p': downscale_p,
+    #     },
+    #     'Downscale',
+    # ):
+    #     applied_logs.append(
+    #         f"Downscale: scale_range=[{downscale_lower},{downscale_upper}], p={downscale_p}"
+    #     )
 
     # 11. RandomShadow
     # shadow_num_lower = int(sweep_config.get('shadow_num_lower', 1))
@@ -389,40 +389,40 @@ def train_with_sweep():
     #     )
 
     # 12. PlasmaShadow
-    plasma_shadow_intensity_lower = sweep_config.get('plasma_shadow_intensity_lower', 0.3)
-    plasma_shadow_intensity_upper = sweep_config.get('plasma_shadow_intensity_upper', 0.7)
-    plasma_roughness = sweep_config.get('plasma_roughness', 3.0)
-    plasma_shadow_p = sweep_config.get('plasma_shadow_p', 0.2)
-    if apply_transform_params(
-        'albumentations.PlasmaShadow',
-        {
-            'shadow_intensity_range': [plasma_shadow_intensity_lower, plasma_shadow_intensity_upper],
-            'roughness': plasma_roughness,
-            'p': plasma_shadow_p,
-        },
-        'PlasmaShadow',
-    ):
-        applied_logs.append(
-            f"PlasmaShadow: shadow_intensity_range=[{plasma_shadow_intensity_lower},{plasma_shadow_intensity_upper}], roughness={plasma_roughness}, p={plasma_shadow_p}"
-        )
+    # plasma_shadow_intensity_lower = sweep_config.get('plasma_shadow_intensity_lower', 0.3)
+    # plasma_shadow_intensity_upper = sweep_config.get('plasma_shadow_intensity_upper', 0.7)
+    # plasma_roughness = sweep_config.get('plasma_roughness', 3.0)
+    # plasma_shadow_p = sweep_config.get('plasma_shadow_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.PlasmaShadow',
+    #     {
+    #         'shadow_intensity_range': [plasma_shadow_intensity_lower, plasma_shadow_intensity_upper],
+    #         'roughness': plasma_roughness,
+    #         'p': plasma_shadow_p,
+    #     },
+    #     'PlasmaShadow',
+    # ):
+    #     applied_logs.append(
+    #         f"PlasmaShadow: shadow_intensity_range=[{plasma_shadow_intensity_lower},{plasma_shadow_intensity_upper}], roughness={plasma_roughness}, p={plasma_shadow_p}"
+    #     )
 
     # 13. RandomFog
-    fog_coef_lower = sweep_config.get('fog_coef_lower', 0.1)
-    fog_coef_upper = sweep_config.get('fog_coef_upper', 0.3)
-    fog_alpha_coef = sweep_config.get('fog_alpha_coef', 0.08)
-    random_fog_p = sweep_config.get('random_fog_p', 0.2)
-    if apply_transform_params(
-        'albumentations.RandomFog',
-        {
-            'fog_coef_range': [fog_coef_lower, fog_coef_upper],
-            'alpha_coef': fog_alpha_coef,
-            'p': random_fog_p,
-        },
-        'RandomFog',
-    ):
-        applied_logs.append(
-            f"RandomFog: fog_coef_range=[{fog_coef_lower},{fog_coef_upper}], alpha_coef={fog_alpha_coef}, p={random_fog_p}"
-        )
+    # fog_coef_lower = sweep_config.get('fog_coef_lower', 0.1)
+    # fog_coef_upper = sweep_config.get('fog_coef_upper', 0.3)
+    # fog_alpha_coef = sweep_config.get('fog_alpha_coef', 0.08)
+    # random_fog_p = sweep_config.get('random_fog_p', 0.2)
+    # if apply_transform_params(
+    #     'albumentations.RandomFog',
+    #     {
+    #         'fog_coef_range': [fog_coef_lower, fog_coef_upper],
+    #         'alpha_coef': fog_alpha_coef,
+    #         'p': random_fog_p,
+    #     },
+    #     'RandomFog',
+    # ):
+    #     applied_logs.append(
+    #         f"RandomFog: fog_coef_range=[{fog_coef_lower},{fog_coef_upper}], alpha_coef={fog_alpha_coef}, p={random_fog_p}"
+    #     )
 
     if applied_logs:
         print("Augmentation params configured:")
