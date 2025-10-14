@@ -7,16 +7,21 @@ metric:
   goal: maximize
 
 parameters:
-  # 1. RandomBrightnessContrast (train_transform.transforms[3])
-  brightness_limit:
-    min: 0.1
-    max: 0.4
-  contrast_limit:
-    min: 0.1
-    max: 0.4
-  brightness_contrast_p:
+  # HorizontalFlip (train_transform.transforms[2])
+  horizontal_flip_p:
     min: 0.0
-    max: 0.5
+    max: 1.0
+
+  # 1. RandomBrightnessContrast (train_transform.transforms[3])
+  # brightness_limit:
+  #   min: 0.1
+  #   max: 0.4
+  # contrast_limit:
+  #   min: 0.1
+  #   max: 0.4
+  # brightness_contrast_p:
+  #   min: 0.0
+  #   max: 0.5
 
   # 2. ColorJitter (train_transform.transforms[4])
   # color_jitter_brightness:

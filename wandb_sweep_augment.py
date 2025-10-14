@@ -196,22 +196,35 @@ def train_with_sweep():
 
     applied_logs = []
 
-    # 1. RandomBrightnessContrast
-    brightness_limit = sweep_config.get('brightness_limit', 0.2)
-    contrast_limit = sweep_config.get('contrast_limit', 0.2)
-    brightness_contrast_p = sweep_config.get('brightness_contrast_p', 0.3)
+    # HorizontalFlip
+    horizontal_flip_p = sweep_config.get('horizontal_flip_p', 0.5)
     if apply_transform_params(
-        'albumentations.RandomBrightnessContrast',
+        'albumentations.HorizontalFlip',
         {
-            'brightness_limit': brightness_limit,
-            'contrast_limit': contrast_limit,
-            'p': brightness_contrast_p,
+            'p': horizontal_flip_p,
         },
-        'RandomBrightnessContrast',
+        'HorizontalFlip',
     ):
         applied_logs.append(
-            f"RandomBrightnessContrast: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}"
+            f"HorizontalFlip: p={horizontal_flip_p}"
         )
+
+    # 1. RandomBrightnessContrast (현재 sweep 비활성화)
+    # brightness_limit = sweep_config.get('brightness_limit', 0.2)
+    # contrast_limit = sweep_config.get('contrast_limit', 0.2)
+    # brightness_contrast_p = sweep_config.get('brightness_contrast_p', 0.3)
+    # if apply_transform_params(
+    #     'albumentations.RandomBrightnessContrast',
+    #     {
+    #         'brightness_limit': brightness_limit,
+    #         'contrast_limit': contrast_limit,
+    #         'p': brightness_contrast_p,
+    #     },
+    #     'RandomBrightnessContrast',
+    # ):
+    #     applied_logs.append(
+    #         f"RandomBrightnessContrast: brightness_limit={brightness_limit}, contrast_limit={contrast_limit}, p={brightness_contrast_p}"
+    #     )
 
     # 2. ColorJitter
     # color_jitter_brightness = sweep_config.get('color_jitter_brightness', 0.2)
