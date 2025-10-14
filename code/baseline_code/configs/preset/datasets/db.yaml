@@ -38,6 +38,13 @@ transforms:
         p: 1.0
       - _target_: albumentations.HorizontalFlip
         p: 0.5
+      # - _target_: albumentations.VerticalFlip
+      #   p: 0.5
+      # - _target_: albumentations.ShiftScaleRotate
+      #   shift_limit: 0.0625
+      #   scale_limit: 0.1
+      #   rotate_limit: 15
+      #   p: 0.5
       # 색상/밝기 조정 증강
       - _target_: albumentations.RandomBrightnessContrast
         brightness_limit: 0.2772984123453732
