@@ -205,6 +205,9 @@ H-Mean	Precision	Recall
 rbc_b32_c28_p40
 Leaderboard:
 0.9870 / 0.9869 / 0.9874
+        brightness_limit: 0.32790290721690396
+        contrast_limit: 0.2837328575729313
+        p: 0.4049235865094287
 
 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
        Test metric             DataLoader 0
@@ -280,12 +283,18 @@ uv run python runners/predict.py \
 LeaderBoard : 0.9886 / 0.9886 / 0.9888
 ---------------------------------
 
+best brightness_contrast sweep
+brightness_contrast_p:0.3384684186607359
+brightness_limit:0.2772984123453732
+contrast_limit:0.283989673632353
 
 
 
 
 
 
+
+------------------
 best 증강 sweep
 brightness_contrast_p:0.17099417286429375
 brightness_limit:0.34146436314408957

@@ -40,9 +40,9 @@ transforms:
         p: 0.5
       # 색상/밝기 조정 증강
       - _target_: albumentations.RandomBrightnessContrast
-        brightness_limit: 0.32790290721690396
-        contrast_limit: 0.2837328575729313
-        p: 0.4049235865094287
+        brightness_limit: 0.2772984123453732
+        contrast_limit: 0.283989673632353
+        p: 0.3384684186607359
       # - _target_: albumentations.ColorJitter
       #   brightness: 0.1482166002922425
       #   contrast: 0.1380738907923448
