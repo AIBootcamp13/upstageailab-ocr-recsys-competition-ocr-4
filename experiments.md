@@ -287,7 +287,7 @@ best brightness_contrast sweep
 brightness_contrast_p:0.3384684186607359
 brightness_limit:0.2772984123453732
 contrast_limit:0.283989673632353
-- 기존 베에스 파라미터(베이스라인모델. 각각 약 30분소요) : 0.96802. sweep 후 베스트 파라미터 : 0.96916
+- 기존 베스트 파라미터(베이스라인모델. 각각 약 30분소요) : 0.96802. sweep 후 베스트 파라미터 : 0.96916
 
 
 
