@@ -1,0 +1,183 @@
+# WandB Sweep Configuration for Augmentation Optimization
+# 베스트 파라미터는 고정하고, 다양한 augmentation 파라미터를 최적화
+
+method: bayes  # bayes, grid, random
+metric:
+  name: test/hmean
+  goal: maximize
+
+parameters:
+  # HorizontalFlip (train_transform.transforms[2])
+  horizontal_flip_p:
+    min: 0.0
+    max: 1.0
+
+  # 1. RandomBrightnessContrast (train_transform.transforms[3])
+  # brightness_limit:
+  #   min: 0.1
+  #   max: 0.4
+  # contrast_limit:
+  #   min: 0.1
+  #   max: 0.4
+  # brightness_contrast_p:
+  #   min: 0.0
+  #   max: 0.5
+
+  # 2. ColorJitter (train_transform.transforms[4])
+  # color_jitter_brightness:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_contrast:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_saturation:
+  #   min: 0.0
+  #   max: 0.3
+  # color_jitter_hue:
+  #   min: 0.0
+  #   max: 0.15
+  # color_jitter_p:
+  #   min: 0.0
+  #   max: 0.5
+
+  # 3. RandomGamma (train_transform.transforms[5])
+  # gamma_limit_lower:
+  #   min: 70
+  #   max: 90
+  # gamma_limit_upper:
+  #   min: 110
+  #   max: 130
+  # random_gamma_p:
+  #   min: 0.0
+  #   max: 0.5
+
+  # # 4. HueSaturationValue (train_transform.transforms[6])
+  # hue_shift_limit:
+  #   min: 0
+  #   max: 30
+  # sat_shift_limit:
+  #   min: 0
+  #   max: 40
+  # val_shift_limit:
+  #   min: 0
+  #   max: 30
+  # hsv_p:
+  #   min: 0.0
+  #   max: 0.5
+
+  # 5. GaussianBlur (train_transform.transforms[7])
+  # gaussian_blur_limit:
+  #   min: 3
+  #   max: 9
+  # gaussian_blur_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 6. MotionBlur (train_transform.transforms[8])
+  # motion_blur_limit:
+  #   min: 3
+  #   max: 9
+  # motion_blur_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 7. GaussNoise (train_transform.transforms[9])
+  # # std_range: 가우시안 노이즈의 표준편차 범위 (이미지는 0-1 정규화됨)
+  # gauss_noise_std_lower:
+  #   min: 0.01
+  #   max: 0.05
+  # gauss_noise_std_upper:
+  #   min: 0.05
+  #   max: 0.15
+  # gauss_noise_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 8. ImageCompression (train_transform.transforms[10])
+  # # quality_range: JPEG 압축 품질 (낮을수록 더 많이 압축)
+  # compression_quality_lower:
+  #   min: 60
+  #   max: 80
+  # compression_quality_upper:
+  #   min: 95
+  #   max: 100
+  # image_compression_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 9. Sharpen (train_transform.transforms[11])
+  # sharpen_alpha_lower:
+  #   min: 0.1
+  #   max: 0.3
+  # sharpen_alpha_upper:
+  #   min: 0.4
+  #   max: 0.7
+  # sharpen_lightness_lower:
+  #   min: 0.3
+  #   max: 0.6
+  # sharpen_lightness_upper:
+  #   min: 0.8
+  #   max: 1.2
+  # sharpen_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 10. Downscale (train_transform.transforms[12])
+  # # scale_range: 다운스케일 비율 (0.5 = 50% 크기로 축소 후 다시 확대)
+  # downscale_lower:
+  #   min: 0.6
+  #   max: 0.8
+  # downscale_upper:
+  #   min: 0.85
+  #   max: 0.98
+  # downscale_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # 11. RandomShadow (train_transform.transforms[13])
+  # num_shadows_limit: 그림자 개수 범위
+  # shadow_num_lower:
+  #   min: 1
+  #   max: 2
+  # shadow_num_upper:
+  #   min: 2
+  #   max: 4
+  # shadow_dimension:
+  #   min: 3
+  #   max: 7
+  # random_shadow_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 12. PlasmaShadow (train_transform.transforms[14])
+  # plasma_shadow_intensity_lower:
+  #   min: 0.2
+  #   max: 0.4
+  # plasma_shadow_intensity_upper:
+  #   min: 0.6
+  #   max: 0.8
+  # plasma_roughness:
+  #   min: 2.0
+  #   max: 5.0
+  # plasma_shadow_p:
+  #   min: 0.0
+  #   max: 0.4
+
+  # # 13. RandomFog (train_transform.transforms[15])
+  # # fog_coef_range: 안개 농도 범위
+  # fog_coef_lower:
+  #   min: 0.05
+  #   max: 0.15
+  # fog_coef_upper:
+  #   min: 0.2
+  #   max: 0.4
+  # fog_alpha_coef:
+  #   min: 0.05
+  #   max: 0.12
+  # random_fog_p:
+  #   min: 0.0
+  #   max: 0.4
+
+# 프로젝트 설정 (환경변수로 오버라이드 가능)
+project: OCR-Augment-Sweep
+entity: null  # WANDB_ENTITY 환경변수 사용

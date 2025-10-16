@@ -72,6 +72,8 @@ class DBCollateFN:
             # https://arxiv.org/pdf/1911.08947.pdf 참고
             L = cv2.arcLength(poly, True) + np.finfo(float).eps
             D = cv2.contourArea(poly) * (1 - self.shrink_ratio ** 2) / L
+            if D <= 0:
+                continue
             pco = pyclipper.PyclipperOffset()
             pco.AddPaths(poly, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
 
@@ -103,10 +105,11 @@ class DBCollateFN:
                                      (height, width))
 
                 distance_map = np.zeros((polygon.shape[0], height, width), dtype=np.float32)
+                denom = max(D, 1e-6)
                 for i in range(polygon.shape[0]):
                     j = (i + 1) % polygon.shape[0]
                     absolute_distance = self.distance(xs, ys, polygon[i], polygon[j])
-                    distance_map[i] = np.clip(absolute_distance / D, 0, 1)
+                    distance_map[i] = np.clip(absolute_distance / denom, 0, 1)
                 distance_map = distance_map.min(axis=0)
 
                 xmin_valid = min(max(0, xmin), thresh_map.shape[1] - 1)

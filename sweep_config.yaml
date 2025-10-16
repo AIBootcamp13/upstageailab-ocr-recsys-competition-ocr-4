@@ -1,0 +1,150 @@
+# WandB Sweep Configuration for HRNet OCR Optimization
+# experiments.md의 베스트 파라미터들을 포함한 체계적인 탐색
+
+method: bayes  # bayes, grid, random
+metric:
+  name: test/hmean
+  goal: maximize
+
+parameters:
+  # HRNet 계열 모델 (상위 모델 포함)
+  models.encoder.model_name:
+    values:
+      - hrnet_w18    # 베스트 성능 (hmean 0.9788)
+      - hrnet_w32    # 상위 모델
+      - hrnet_w40    # 상위 모델
+      - hrnet_w44    # 상위 모델
+      - hrnet_w48    # 최상위 모델
+      - hrnet_w64    # 최상위 모델
+
+  # === 데이터 증강 파라미터 ===
+
+  brightness_limit:
+    min: 0.1
+    max: 0.4
+
+  contrast_limit:
+    min: 0.1
+    max: 0.4
+
+  brightness_contrast_p:
+    min: 0.0
+    max: 0.5
+
+  # 이미지 사이즈 (experiments.md에서 800이 좋은 성능)
+  image_size:
+    values: [640, 800, 1024, 1280]
+
+  # 배치 사이즈 (메모리 효율성 고려)
+  batch_size:
+    values: [4, 8, 16, 32]
+
+  # === 후처리 파라미터 (experiments.md 베스트 범위) ===
+
+  # 베스트: 0.22 (experiments.md line 133, 140)
+  models.head.postprocess.thresh:
+    min: 0.19
+    max: 0.25
+
+  # 베스트: 0.42 (experiments.md line 133, 140)
+  models.head.postprocess.box_thresh:
+    min: 0.40
+    max: 0.49
+
+  # 베스트: 1.3 (experiments.md line 140)
+  models.head.postprocess.box_unclip_ratio:
+    min: 1.2
+    max: 1.6
+
+  # 베스트: 1.8 (experiments.md line 140, 161)
+  models.head.postprocess.polygon_unclip_ratio:
+    min: 1.6
+    max: 2.0
+
+  # === DB Loss 파라미터 (성능에 큰 영향) ===
+
+  # 기본값: 3.0
+  models.loss.negative_ratio:
+    min: 2.0
+    max: 4.0
+
+  # 기본값: 5.0
+  models.loss.prob_map_loss_weight:
+    min: 3.0
+    max: 7.0
+
+  # 기본값: 10.0
+  models.loss.thresh_map_loss_weight:
+    min: 5.0
+    max: 12.0
+
+  # 기본값: 1.0
+  models.loss.binary_map_loss_weight:
+    min: 0.5
+    max: 2.0
+
+  # === DB Head 파라미터 ===
+
+  # amplifying factor, 기본값: 50
+  models.head.k:
+    values: [40, 45, 50, 55, 60]
+
+  # === 학습 파라미터 ===
+
+  # experiments.md에서 AdamW는 성능 저하 (line 45)
+  models.optimizer._target_:
+    values:
+      - torch.optim.Adam      # 베스트
+      - torch.optim.AdamW     # 비교용
+
+  # 기본값: 0.001
+  models.optimizer.lr:
+    min: 0.0005
+    max: 0.002
+
+  # 기본값: 0.0001
+  models.optimizer.weight_decay:
+    min: 0.00005
+    max: 0.0005
+
+  # 스케줄러 선택
+  models.scheduler._target_:
+    values: ['torch.optim.lr_scheduler.StepLR', 'torch.optim.lr_scheduler.CosineAnnealingLR']
+
+  # StepLR 파라미터
+  models.scheduler.step_size:
+    values: [50, 75, 100, 125]
+
+  models.scheduler.gamma:
+    values: [0.05, 0.07, 0.1, 0.2, 0.5]
+
+  # CosineAnnealingLR 파라미터
+  models.scheduler.T_max:
+    values: [8, 10, 12]
+
+  # experiments.md에서 10 epoch이 최적 (line 72)
+  trainer.max_epochs:
+    distribution: int_uniform
+    min: 5
+    max: 20
+
+  # === CollateFN 파라미터 (데이터 증강에 영향) ===
+
+  # 기본값: 0.4
+  collate_fn.shrink_ratio:
+    min: 0.3
+    max: 0.5
+
+  # 기본값: 0.3
+  collate_fn.thresh_min:
+    min: 0.2
+    max: 0.4
+
+  # 기본값: 0.7
+  collate_fn.thresh_max:
+    min: 0.6
+    max: 0.8
+
+# 프로젝트 설정 (환경변수로 오버라이드 가능)
+project: OCR-HRNet-Sweep
+entity: null  # WANDB_ENTITY 환경변수 사용

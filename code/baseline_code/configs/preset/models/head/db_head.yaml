@@ -11,7 +11,10 @@ models:
     bias: False                      # Use bias or not in LayerNorm
     smooth: False                    # Use smooth or not in Upsample
     postprocess:
-      thresh: 0.3                    # Binarization threshold
-      box_thresh: 0.4                # Detection Box threshold
+      thresh: 0.25                    # Binarization threshold
+      box_thresh: 0.45                # Detection Box threshold
       max_candidates: 300            # Limit the number of detection boxes
-      use_polygon: False             # Detection Box Type (QUAD or POLY)
+      use_polygon: True             # Detection Box Type (QUAD or POLY)
+      min_size: 3                    # Minimum detection box side length
+      box_unclip_ratio: 1.5         # Unclip ratio for quadrilateral boxes
+      polygon_unclip_ratio: 2.0     # Unclip ratio for polygon boxes

@@ -37,19 +37,21 @@ transforms:
         border_mode: 0
         p: 1.0
       - _target_: albumentations.HorizontalFlip
-        p: 0.5
-      # - _target_: albumentations.VerticalFlip
-      #   p: 0.5
-      # - _target_: albumentations.ShiftScaleRotate
-      #   shift_limit: 0.0625
-      #   scale_limit: 0.1
-      #   rotate_limit: 15
-      #   p: 0.5
+        p: 0.49747126989428736
       # 색상/밝기 조정 증강
       - _target_: albumentations.RandomBrightnessContrast
-        brightness_limit: 0.32790290721690396
-        contrast_limit: 0.2837328575729313
-        p: 0.4049235865094287
+        brightness_limit: 0.31371397565866055
+        contrast_limit: 0.22951926225444885
+        p: 0.9858238536703968
+      - _target_: albumentations.VerticalFlip
+        p: 0.1489830892675842
+      - _target_: albumentations.ShiftScaleRotate
+        shift_limit: 0.03263873032842268
+        scale_limit: 0.16907821240237744
+        rotate_limit: 15.893568362136104
+        interpolation: 1
+        border_mode: 0
+        p: 0.41301489725673046
       # - _target_: albumentations.ColorJitter
       #   brightness: 0.1482166002922425
       #   contrast: 0.1380738907923448

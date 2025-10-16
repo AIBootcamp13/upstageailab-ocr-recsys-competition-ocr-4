@@ -8,8 +8,8 @@ lightning_path: ocr.lightning_modules
 
 hydra:
   run:
-    dir: 'outputs/${exp_name}'
+    dir: 'outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}'
 
-log_dir: 'outputs/${exp_name}/logs'
-checkpoint_dir: 'outputs/${exp_name}/checkpoints'
-submission_dir: 'outputs/${exp_name}/submissions'
+log_dir: '${hydra:runtime.output_dir}/logs'
+checkpoint_dir: '${hydra:runtime.output_dir}/checkpoints'
+submission_dir: '${hydra:runtime.output_dir}/submissions'

@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - preset:
+  - preset: example
   - override hydra/hydra_logging: disabled
   - override hydra/job_logging: disabled
 
@@ -8,7 +8,7 @@ seed: 42
 exp_name: "ocr_training"
 project_name: "OCRProject"
 
-wandb: False
+wandb: True
 exp_version: "v1.0"
 
 resume: null
@@ -19,3 +19,13 @@ trainer:
   log_every_n_steps: 50
   check_val_every_n_epoch: 1
   deterministic: True
+# # smoke test
+# trainer:
+#   max_epochs: 1
+#   num_sanity_val_steps: 0
+#   log_every_n_steps: 1
+#   check_val_every_n_epoch: 1
+#   deterministic: True
+#   limit_train_batches: 2
+#   limit_val_batches: 2
+#   limit_test_batches: 2

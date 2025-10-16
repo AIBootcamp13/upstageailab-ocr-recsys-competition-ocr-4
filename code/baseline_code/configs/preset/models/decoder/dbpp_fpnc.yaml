@@ -1,0 +1,17 @@
+# @package _global_
+
+# DBNet++ (Adaptive Scale Fusion) FPNC 디코더 설정
+
+models:
+  decoder:
+    _target_: ${decoder_path}.FPNC
+    in_channels: [64, 128, 256, 512]
+    lateral_channels: 256
+    out_channels: 64
+    bias_on_lateral: False
+    bn_re_on_lateral: False
+    bias_on_smooth: False
+    bn_re_on_smooth: False
+    conv_after_concat: False
+    asf_cfg:
+      attention_type: ScaleChannelSpatial

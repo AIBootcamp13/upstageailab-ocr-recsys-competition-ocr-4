@@ -5,14 +5,8 @@ from pathlib import Path
 
 
 def convert_json_to_csv(json_path, output_path):
-    # Check if CSV file already exists
     csv_file = Path(output_path)
-    if csv_file.exists():
-        response = input(f"The file '{csv_file}' already exists. "
-                         f"Do you want to overwrite it? (yes/No): ").strip().lower()
-        if response != 'yes':
-            print("Conversion cancelled.")
-            return None
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(json_path, 'r') as json_file:
         data = json.load(json_file)
@@ -38,7 +32,7 @@ def convert_json_to_csv(json_path, output_path):
     df = pd.DataFrame(rows, columns=['filename', 'polygons'])
     df.to_csv(output_path, index=False)
 
-    return len(rows), output_path
+    return len(rows), str(csv_file.resolve())
 
 
 def convert():
