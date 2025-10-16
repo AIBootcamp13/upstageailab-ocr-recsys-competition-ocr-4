@@ -57,9 +57,9 @@ uv sync
 │   │   ├── datasets/ metrics/ models/ utils/
 │   │   └── lightning_modules/
 │   ├── runners
-│   │   ├── train.py
-│   │   ├── test.py
-│   │   └── predict.py
+│   │   ├── train.py              # train 데이터로 훈련 프로그램
+│   │   ├── test.py               # val 데이터로 평가 프로그램
+│   │   └── predict.py            # test 데이터로 추론 프로그램
 │   ├── requirements.txt
 │   └── README.md
 ├── data
@@ -68,6 +68,13 @@ uv sync
 │   │   ├── jsons/{train.json,val.json,test.json}
 │   │   └── sample_submission.csv
 │   └── get_data.sh
+├── convert_images.py             # 이미지 일괄 리사이즈/포맷 변환 스크립트
+├── sweep_config.yaml             # WandB 스윕 기본 설정
+├── sweep_config_augment.yaml     # 증강 스윕 설정
+├── sweep_config_postprocess.yaml # 후처리 스윕 설정
+├── wandb_sweep.py                # 기본 스윕 실행 진입점
+├── wandb_sweep_augment.py        # 증강 스윕 실행 스크립트
+├── wandb_postprocess_sweep.py    # 후처리 스윕 실행 스크립트
 ├── AGENTS.md
 └── README.md (this file)
 ```
@@ -127,15 +134,11 @@ uv run python code/ocr/utils/convert_submission.py \
 - _Insert Leader Board Capture_
 - _Write rank and score_
 
-### Presentation
-
-- _Insert your presentaion file(pdf) link_
-
 ## etc
 
 ### Meeting Log
 
-- _Insert your meeting log link like Notion or Google Docs_
+- Issues : https://github.com/AIBootcamp13/upstageailab-ocr-recsys-competition-ocr-4/issues
 
 ### Reference
 - DBNet: https://github.com/MhLiao/DB
