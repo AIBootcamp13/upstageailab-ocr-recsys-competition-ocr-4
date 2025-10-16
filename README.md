@@ -43,26 +43,25 @@ uv sync
 프로젝트 주요 구조는 아래와 같습니다.
 ```
 ├── code
-│   └── baseline_code
-│       ├── configs
-│       │   ├── predict.yaml
-│       │   ├── test.yaml
-│       │   ├── train.yaml
-│       │   └── preset
-│       │       ├── base.yaml
-│       │       ├── example.yaml
-│       │       ├── datasets
-│       │       │   └── db.yaml
-│       │       └── models/lightning_modules/metrics/...
-│       ├── ocr
-│       │   ├── datasets/ metrics/ models/ utils/
-│       │   └── lightning_modules/
-│       ├── runners
-│       │   ├── train.py
-│       │   ├── test.py
-│       │   └── predict.py
-│       ├── requirements.txt
-│       └── README.md
+│   ├── configs
+│   │   ├── predict.yaml
+│   │   ├── test.yaml
+│   │   ├── train.yaml
+│   │   └── preset
+│   │       ├── base.yaml
+│   │       ├── example.yaml
+│   │       ├── datasets
+│   │       │   └── db.yaml
+│   │       └── models/lightning_modules/metrics/...
+│   ├── ocr
+│   │   ├── datasets/ metrics/ models/ utils/
+│   │   └── lightning_modules/
+│   ├── runners
+│   │   ├── train.py
+│   │   ├── test.py
+│   │   └── predict.py
+│   ├── requirements.txt
+│   └── README.md
 ├── data
 │   ├── datasets
 │   │   ├── images/{train,val,test}/
