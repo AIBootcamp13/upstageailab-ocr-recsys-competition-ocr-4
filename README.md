@@ -131,8 +131,27 @@ uv run python code/ocr/utils/convert_submission.py \
 
 ### Leader Board
 
-- _Insert Leader Board Capture_
-- _Write rank and score_
+| Model | Detail | Img | Aug | Notes | H-Mean | Precision | Recall | Source |
+|-------|--------|-----|-----|-------|--------|-----------|--------|--------|
+| resnet18 | 베이스라인 (dbnet) | 640 |  |  | 0.8555 | 0.9689 | 0.7750 | jhryu |
+| resnet18 | use_polygon | 640 |  |  | 0.9529 | 0.9784 | 0.9315 | jhryu |
+| convnext | tiny | 640 |  |  | 0.9631 | 0.9794 | 0.9495 | taehyun |
+| convnext | base | 640 |  |  | 0.9640 | 0.9843 | 0.9468 | taehyun |
+| coat_lite | medium384 | 640 |  |  | 0.9706 | 0.9877 | 0.9555 | taehyun |
+| coat_lite | medium384 | 640 | Bright&Contrast | candidate=1000, 후처리 조정 | 0.9790 | 0.9838 | 0.9752 | taehyun |
+| convnext | base 384 | 640 |  | candidate=1000, 후처리 조정 | 0.9752 | 0.9798 | 0.9714 | taehyun |
+| convnext | base384 | 640 | Bright&Contrast | candidate=1000, 후처리 조정 | 0.9766 | 0.9793 | 0.9748 | taehyun |
+| convnext | base384 | 640 | Bright&Contrast | loss beta=12, candidate=1000, 후처리 조정 | 0.9811 | 0.9848 | 0.9779 | taehyun |
+| convnext | large | 1024 | Bright&Contrast | loss beta=12 | 0.9774 | 0.9763 | 0.9792 | taehyun |
+| convnext | base384 | 1024 | Bright&Contrast | loss beta=12 | 0.9818 | 0.9815 | 0.9826 | taehyun |
+| convnext | base.clip_384 | 1024 | Bright&Contrast | sweep 적용, loss beta=12 | 0.9821 | 0.9824 | 0.9828 | taehyun |
+| convnextV2 | base384 | 1024 | Bright&Contrast | sweep 적용, loss beta=12 | 0.9822 | 0.9793 | 0.9859 | taehyun |
+| convnext | base384 | 1024 | Bright&Contrast | sweep 적용, loss beta=12 | 0.9842 | 0.9860 | 0.9829 | taehyun |
+| hrnet_w18 | (dbnet) | 640 |  |  | 0.9643 | 0.9823 | 0.9492 | jhryu |
+| hrnet_w18 | (dbnet++), 후처리 최적화 | 640 |  | thresh=0.20, box_thresh=0.40, box_unclip_ratio=1.2, polygon_unclip_ratio=1.8 | 0.9792 | 0.9820 | 0.9774 | jhryu |
+| hrnet_w44 |  | 1024 |  | WandB Sweep 최적 하이퍼파라미터 | 0.9845 | 0.9851 | 0.9845 | jhryu |
+| hrnet_w44 | 증강 sweep | 1024 | Bright&Contrast | brightness_limit=0.3279, contrast_limit=0.2837, p=0.4049 | 0.9870 | 0.9869 | 0.9874 | jhryu |
+| hrnet_w44 | 후처리 sweep | 1024 | Bright&Contrast | box_thresh=0.4008, box_unclip_ratio=1.8749, polygon_unclip_ratio=1.3102, thresh=0.1505 | **0.9886** | **0.9886** | **0.9888** | jhryu |
 
 ## etc
 
