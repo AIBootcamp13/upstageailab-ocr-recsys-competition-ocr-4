@@ -13,3 +13,5 @@
 | convnext   | base.clip_384 | Bright&Contrast | 1024     | 적용          | 12           | 1000      | 조정                    | 0.9821 | 0.9824    | 0.9828 |
 | convnextV2 | base384       | Bright&Contrast | 1024     | 적용          | 12           | 1000      | 조정                    | 0.9822 | 0.9793    | 0.9859 |
 | convnext   | base384       | Bright&Contrast | 1024     | 적용          | 12           | 1000      | 조정                    | 0.9842 | 0.9860    | 0.9829 |
+| hrnet_w44   | base384       | Bright&Contrast | 1024     | 적용          | 12           | 1000      | 조정                    | 0.9864 | 0.9870    | 0.9862 |
+| hrnet_w48   | base384       | Bright&Contrast | 1024     | 적용          | 12           | 1000      | 조정                    | 0.9860 | 0.9876    | 0.9848 |
