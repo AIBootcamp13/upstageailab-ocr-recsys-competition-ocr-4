@@ -88,7 +88,7 @@ uv sync
 - 누락/이상 라벨 검토 및 클래스 불균형 점검
 
 ### Data Processing
-- 설정 파일: `code/baseline_code/configs/preset/datasets/db.yaml`
+- 설정 파일: `code/configs/preset/datasets/db.yaml`
 - 주요 전처리: 리사이즈/정규화, 데이터 증강, collate 함수(`db_collate_fn.py`)
 - 경로 설정: `dataset_base_path`를 로컬 데이터 루트로 지정
 ```yaml
@@ -105,19 +105,19 @@ dataset_base_path: "/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/dat
 ### Modeling Process
 - 학습
 ```bash
-uv run python code/baseline_code/runners/train.py preset=example
+uv run python code/runners/train.py preset=example
 ```
 - 검증/테스트 (체크포인트 지정)
 ```bash
-uv run python code/baseline_code/runners/test.py preset=example "checkpoint_path='{checkpoint_path}'"
+uv run python code/runners/test.py preset=example "checkpoint_path='{checkpoint_path}'"
 ```
 - 예측 및 제출 파일 JSON 생성
 ```bash
-uv run python code/baseline_code/runners/predict.py preset=example "checkpoint_path='{checkpoint_path}'"
+uv run python code/runners/predict.py preset=example "checkpoint_path='{checkpoint_path}'"
 ```
 - 제출 포맷 변환
 ```bash
-uv run python code/baseline_code/ocr/utils/convert_submission.py \
+uv run python code/ocr/utils/convert_submission.py \
   --json_path {json_path} --output_path {output_path}
 ```
 

@@ -41,7 +41,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "code" / "baseline_code"))
 from ocr.lightning_modules import get_pl_modules_by_cfg
 from ocr.utils.console_logging import setup_console_logging
 
-CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or 'code/baseline_code/configs'
+CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or 'code/configs'
 
 # HRNet 모델별 in_channels 매핑 (현재 작동하는 설정 기준)
 HRNET_CHANNELS = {

@@ -1,7 +1,7 @@
 그렇게 진행하되 베스트 점수를 갱신할때마다 제출파일 csv도 생성해줘.
 
 에폭을 10으로만 실험하고 있는거 같은데 좀 더 늘리고 얼리스탑을 적용하는게 어떤가?
-uv run python code/baseline_code/runners/train.py preset=example dataset_base_path='/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/' exp_name=hrnet_dbpp_full models.encoder.model_name=hrnet_w18 models.encoder.select_features='[1,2,3,4]' models.decoder.in_channels='[128,256,512,1024]'
+uv run python code/runners/train.py preset=example dataset_base_path='/root/dev/upstageailab-ocr-recsys-competition-ocr-4/data/datasets/' exp_name=hrnet_dbpp_full models.encoder.model_name=hrnet_w18 models.encoder.select_features='[1,2,3,4]' models.decoder.in_channels='[128,256,512,1024]'
 
 
 아래 사항을 적용해줘.
@@ -52,7 +52,7 @@ Nomalize 위에다
 
 
 
-uv run python code/baseline_code/runners/train.py \
+uv run python code/runners/train.py \
   preset=example \
   "resume='outputs/2025-09-29/19-52-20/checkpoints/epoch=12-step=21268.ckpt'" \
   models.encoder.model_name=hrnet_w44 \

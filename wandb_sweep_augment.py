@@ -41,7 +41,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "code" / "baseline_code"))
 from ocr.lightning_modules import get_pl_modules_by_cfg
 from ocr.utils.console_logging import setup_console_logging
 
-CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or 'code/baseline_code/configs'
+CONFIG_DIR = os.environ.get('OP_CONFIG_DIR') or 'code/configs'
 
 def convert_sweep_value(value):
     """WandB sweep config 값을 적절한 타입으로 변환"""
