@@ -148,6 +148,7 @@ uv run python code/ocr/utils/convert_submission.py \
 | convnextV2 | base384 | 1024 | Bright&Contrast | sweep 적용, loss beta=12 | 0.9822 | 0.9793 | 0.9859 | taehyun |
 | convnext | base384 | 1024 | Bright&Contrast | sweep 적용, loss beta=12 | 0.9842 | 0.9860 | 0.9829 | taehyun |
 | hrnet_w18 | (dbnet) | 640 |  |  | 0.9643 | 0.9823 | 0.9492 | jhryu |
+| hrnet_w18 | (dbnet++) | 640 |  |  | 0.9684 | 0.9788 | 0.9602 | jhryu |
 | hrnet_w18 | (dbnet++), 후처리 최적화 | 640 |  | thresh=0.20, box_thresh=0.40, box_unclip_ratio=1.2, polygon_unclip_ratio=1.8 | 0.9792 | 0.9820 | 0.9774 | jhryu |
 | hrnet_w44 |  | 1024 |  | WandB Sweep 최적 하이퍼파라미터 | 0.9845 | 0.9851 | 0.9845 | jhryu |
 | hrnet_w44 | 증강 sweep | 1024 | Bright&Contrast | brightness_limit=0.3279, contrast_limit=0.2837, p=0.4049 | 0.9870 | 0.9869 | 0.9874 | jhryu |
