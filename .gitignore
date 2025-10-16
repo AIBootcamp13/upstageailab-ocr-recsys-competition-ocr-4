@@ -1,5 +1,6 @@
 data/datasets
 data/datasets_*/
+visualized*/
 data/data.tar.gz
 .venv/
 __pycache__

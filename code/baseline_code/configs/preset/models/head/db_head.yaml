@@ -12,6 +12,6 @@ models:
     smooth: False                    # Use smooth or not in Upsample
     postprocess:
       thresh: 0.24                    # Binarization threshold
-      box_thresh: 0.34                # Detection Box threshold
-      max_candidates: 1000            # Limit the number of detection boxes
-      use_polygon: True              # Detection Box Type (QUAD or POLY)
+      box_thresh: 0.34                 # Detection Box threshold
+      max_candidates: 1000             # Limit the number of detection boxes
+      use_polygon: False               # Detection Box Type (QUAD or POLY)
