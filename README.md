@@ -77,6 +77,9 @@ uv sync
 
 ### Dataset overview
 - 이미지: `data/datasets/images/{train,val,test}`
+  - train : 훈련용 이미지 3272장
+  - val : 검증용 이미지 404장
+  - test : 테스트용 이미지 413장
 - 어노테이션: `data/datasets/jsons/{train.json,val.json,test.json}`
 - 제출 예시: `data/datasets/sample_submission.csv`
 
